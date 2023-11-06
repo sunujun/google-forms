@@ -29,6 +29,12 @@ module.exports = {
         '@typescript-eslint/no-empty-interface': 'off',
         '@typescript-eslint/no-var-requires': 'off',
         'react-hooks/rules-of-hooks': 'error',
+        'react-hooks/exhaustive-deps': [
+            'warn',
+            {
+                additionalHooks: 'useRecoilCallback',
+            },
+        ],
         semi: ['error', 'always'],
         'import/order': [
             'error',
