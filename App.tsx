@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { ActionSheetProvider } from '@expo/react-native-action-sheet';
 import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { RecoilRoot } from 'recoil';
@@ -9,11 +10,13 @@ const App = () => {
     return (
         <RecoilRoot>
             <SafeAreaProvider>
-                <SafeAreaView style={styles.container}>
-                    <NavigationContainer>
-                        <RootStackNavigation />
-                    </NavigationContainer>
-                </SafeAreaView>
+                <ActionSheetProvider>
+                    <SafeAreaView style={styles.container}>
+                        <NavigationContainer>
+                            <RootStackNavigation />
+                        </NavigationContainer>
+                    </SafeAreaView>
+                </ActionSheetProvider>
             </SafeAreaProvider>
         </RecoilRoot>
     );
