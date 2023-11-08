@@ -3,7 +3,7 @@ import { GestureResponderEvent, Pressable, StyleSheet, Switch, Text, useWindowDi
 import Icon from '@expo/vector-icons/MaterialCommunityIcons';
 import { useRecoilState } from 'recoil';
 
-import { formState } from 'states';
+import { formState, IQuestion } from 'states';
 
 import MultiLineInput, { INPUT_TYPE } from './MultiLineInput';
 
@@ -32,6 +32,15 @@ const QuestionBox = ({ id, type, onLongPress }: QuestionBoxProps) => {
 
     const toggleSwitch = () => {
         setIsRequired(previousState => !previousState);
+    };
+
+    const deleteQuestion = (questionID: string) => {
+        const questionList = form.questionList;
+        const currentIndex = questionList.findIndex(questionItem => questionItem.id === questionID);
+        const willSelectID = currentIndex === 0 ? form.id : questionList[currentIndex - 1].id;
+        const updatedQuestionList: IQuestion[] = questionList.filter(questionItem => questionItem.id !== questionID);
+
+        setForm({ ...form, questionList: updatedQuestionList, selectedID: willSelectID });
     };
 
     return (
@@ -79,10 +88,25 @@ const QuestionBox = ({ id, type, onLongPress }: QuestionBoxProps) => {
                 )}
                 {isSelected && (
                     <View style={styles.utilsContainer}>
-                        <Pressable style={styles.utilsButton}>
+                        <Pressable
+                            style={({ pressed }) => [
+                                {
+                                    backgroundColor: pressed ? '#E1E1E1' : 'transparent',
+                                },
+                                styles.utilsButton,
+                            ]}>
                             <Icon name="content-copy" color="#5F6368" size={20} />
                         </Pressable>
-                        <Pressable style={styles.utilsButton}>
+                        <Pressable
+                            style={({ pressed }) => [
+                                {
+                                    backgroundColor: pressed ? '#E1E1E1' : 'transparent',
+                                },
+                                styles.utilsButton,
+                            ]}
+                            onPress={() => {
+                                deleteQuestion(id);
+                            }}>
                             <Icon name="trash-can-outline" color="#5F6368" size={24} />
                         </Pressable>
                         <View style={styles.divider} />
@@ -172,15 +196,18 @@ const styles = StyleSheet.create({
         marginBottom: -24,
     },
     utilsButton: {
-        width: 48,
-        height: 52,
+        width: 40,
+        height: 40,
+        borderRadius: 20,
         alignItems: 'center',
         justifyContent: 'center',
+        marginVertical: 8,
+        marginHorizontal: 4,
     },
     divider: {
         width: 1,
         height: 24,
-        marginRight: 16,
+        marginHorizontal: 16,
         backgroundColor: '#DADCE0',
     },
     requireText: {
