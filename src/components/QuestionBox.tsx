@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { GestureResponderEvent, Pressable, StyleSheet, Switch, Text, useWindowDimensions, View } from 'react-native';
 import Icon from '@expo/vector-icons/MaterialCommunityIcons';
+import uuid from 'react-native-uuid';
 import { useRecoilState } from 'recoil';
 
 import { formState, IQuestion } from 'states';
@@ -16,31 +17,52 @@ export const ANSWER_TYPE = {
 export type AnswerID = (typeof ANSWER_TYPE)[keyof typeof ANSWER_TYPE];
 
 interface QuestionBoxProps {
-    id: string;
+    item: IQuestion;
     type: AnswerID;
     onLongPress?: ((event: GestureResponderEvent) => void) | null;
 }
 
-const QuestionBox = ({ id, type, onLongPress }: QuestionBoxProps) => {
+const QuestionBox = ({ item, type, onLongPress }: QuestionBoxProps) => {
     const { width } = useWindowDimensions();
     const [form, setForm] = useRecoilState(formState);
 
-    const [question, setQuestion] = useState('');
-    const [isRequired, setIsRequired] = useState(false);
+    const [question, setQuestion] = useState(item.question);
+    const [isRequired, setIsRequired] = useState(item.isRequired);
 
-    const isSelected = form.selectedID === id;
+    const isSelected = form.selectedID === item.id;
+    const questionList = form.questionList;
+    const currentIndex = questionList.findIndex(questionItem => questionItem.id === item.id);
+
+    useEffect(() => {
+        setForm(previousState => ({
+            ...previousState,
+            questionList: previousState.questionList.map(questionItem =>
+                questionItem.id === item.id ? { ...questionItem, question, isRequired } : questionItem,
+            ),
+        }));
+    }, [isRequired, item.id, question, setForm]);
 
     const toggleSwitch = () => {
         setIsRequired(previousState => !previousState);
     };
 
-    const deleteQuestion = (questionID: string) => {
-        const questionList = form.questionList;
-        const currentIndex = questionList.findIndex(questionItem => questionItem.id === questionID);
+    const deleteQuestion = () => {
         const willSelectID = currentIndex === 0 ? form.id : questionList[currentIndex - 1].id;
-        const updatedQuestionList: IQuestion[] = questionList.filter(questionItem => questionItem.id !== questionID);
+        const updatedQuestionList: IQuestion[] = questionList.filter(questionItem => questionItem.id !== item.id);
 
         setForm({ ...form, questionList: updatedQuestionList, selectedID: willSelectID });
+    };
+
+    const copyQuestion = () => {
+        const newID = 'QUESTION-' + uuid.v4();
+        const copiedQuestion: IQuestion = { ...item, id: newID };
+        const updatedQuestionList: IQuestion[] = [
+            ...questionList.slice(0, currentIndex + 1),
+            copiedQuestion,
+            ...questionList.slice(currentIndex + 1),
+        ];
+
+        setForm({ ...form, questionList: updatedQuestionList, selectedID: newID });
     };
 
     return (
@@ -50,7 +72,7 @@ const QuestionBox = ({ id, type, onLongPress }: QuestionBoxProps) => {
                 setForm(previousState => {
                     return {
                         ...previousState,
-                        selectedID: id,
+                        selectedID: item.id,
                     };
                 });
             }}
@@ -94,7 +116,10 @@ const QuestionBox = ({ id, type, onLongPress }: QuestionBoxProps) => {
                                     backgroundColor: pressed ? '#E1E1E1' : 'transparent',
                                 },
                                 styles.utilsButton,
-                            ]}>
+                            ]}
+                            onPress={() => {
+                                copyQuestion();
+                            }}>
                             <Icon name="content-copy" color="#5F6368" size={20} />
                         </Pressable>
                         <Pressable
@@ -105,7 +130,7 @@ const QuestionBox = ({ id, type, onLongPress }: QuestionBoxProps) => {
                                 styles.utilsButton,
                             ]}
                             onPress={() => {
-                                deleteQuestion(id);
+                                deleteQuestion();
                             }}>
                             <Icon name="trash-can-outline" color="#5F6368" size={24} />
                         </Pressable>

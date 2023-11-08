@@ -65,7 +65,7 @@ const MakeFormScreen = () => {
     const renderItem = ({ item, drag }: RenderItemParams<IQuestion>) => {
         return (
             <OpacityDecorator>
-                <QuestionBox id={item.id} type={item.type} onLongPress={drag} />
+                <QuestionBox item={item} type={item.type} onLongPress={drag} />
             </OpacityDecorator>
         );
     };
