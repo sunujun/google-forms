@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, Switch, Text, useWindowDimensions, View } from 'react-native';
 import Icon from '@expo/vector-icons/MaterialCommunityIcons';
+import { useRecoilState } from 'recoil';
+
+import { formState } from 'states';
 
 import MultiLineInput, { INPUT_TYPE } from './MultiLineInput';
 
@@ -13,15 +16,18 @@ export const ANSWER_TYPE = {
 type AnswerID = (typeof ANSWER_TYPE)[keyof typeof ANSWER_TYPE];
 
 interface QuestionBoxProps {
+    id: string;
     type: AnswerID;
 }
 
-const QuestionBox = ({ type }: QuestionBoxProps) => {
+const QuestionBox = ({ id, type }: QuestionBoxProps) => {
     const { width } = useWindowDimensions();
+    const [form, setForm] = useRecoilState(formState);
 
     const [question, setQuestion] = useState('');
-    const [isSelected, setIsSelected] = useState(false);
     const [isRequired, setIsRequired] = useState(false);
+
+    const isSelected = form.selectedID === id;
 
     const toggleSwitch = () => {
         setIsRequired(previousState => !previousState);
@@ -31,8 +37,12 @@ const QuestionBox = ({ type }: QuestionBoxProps) => {
         <Pressable
             style={styles.container}
             onPress={() => {
-                // FIXME: 임시 테스트
-                setIsSelected(previousState => !previousState);
+                setForm(previousState => {
+                    return {
+                        ...previousState,
+                        selectedID: id,
+                    };
+                });
             }}>
             {isSelected && <View style={styles.selectedMark} />}
             <View style={styles.padding}>
@@ -95,14 +105,14 @@ const styles = StyleSheet.create({
         marginVertical: 12,
         borderWidth: 1,
         borderColor: '#DADCE0',
-        borderRadius: 8,
+        borderRadius: 4,
         minHeight: 28,
     },
     selectedMark: {
         backgroundColor: '#4285F4',
-        borderTopLeftRadius: 8,
-        borderBottomLeftRadius: 8,
-        width: 6,
+        borderTopLeftRadius: 4,
+        borderBottomLeftRadius: 4,
+        width: 8,
         position: 'absolute',
         height: '100%',
     },

@@ -5,6 +5,7 @@ export interface IForm {
     title: string;
     description: string;
     questionList: IQuestion[];
+    selectedID: string;
 }
 
 export interface IQuestion {
@@ -19,12 +20,13 @@ export interface IChoice {
     label: string;
 }
 
-export const FormState = atom<IForm>({
+export const formState = atom<IForm>({
     key: 'FORM',
     default: {
         id: 'FORM-1',
         title: '제목 없는 설문지',
         description: '',
         questionList: [],
+        selectedID: 'FORM-1',
     },
 });

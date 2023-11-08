@@ -40,7 +40,8 @@ const MakeFormScreen = () => {
     return (
         <View style={styles.container}>
             <TitleBox />
-            <QuestionBox type={ANSWER_TYPE.Long} />
+            <QuestionBox id="QUESTION-1" type={ANSWER_TYPE.Long} />
+            <QuestionBox id="QUESTION-2" type={ANSWER_TYPE.Short} />
             <View style={[styles.floatingButtonContainer, { bottom: safeAreaInset.bottom + 24 }]}>
                 <Button onPress={onPressFloatingButton}>
                     <View style={styles.floatingButton}>
