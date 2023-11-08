@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pressable, StyleSheet, Switch, Text, useWindowDimensions, View } from 'react-native';
+import { GestureResponderEvent, Pressable, StyleSheet, Switch, Text, useWindowDimensions, View } from 'react-native';
 import Icon from '@expo/vector-icons/MaterialCommunityIcons';
 import { useRecoilState } from 'recoil';
 
@@ -13,14 +13,15 @@ export const ANSWER_TYPE = {
     Multiple: 'multiple',
     CheckBox: 'checkBox',
 } as const;
-type AnswerID = (typeof ANSWER_TYPE)[keyof typeof ANSWER_TYPE];
+export type AnswerID = (typeof ANSWER_TYPE)[keyof typeof ANSWER_TYPE];
 
 interface QuestionBoxProps {
     id: string;
     type: AnswerID;
+    onLongPress?: ((event: GestureResponderEvent) => void) | null;
 }
 
-const QuestionBox = ({ id, type }: QuestionBoxProps) => {
+const QuestionBox = ({ id, type, onLongPress }: QuestionBoxProps) => {
     const { width } = useWindowDimensions();
     const [form, setForm] = useRecoilState(formState);
 
@@ -43,7 +44,8 @@ const QuestionBox = ({ id, type }: QuestionBoxProps) => {
                         selectedID: id,
                     };
                 });
-            }}>
+            }}
+            onLongPress={onLongPress}>
             {isSelected && <View style={styles.selectedMark} />}
             <View style={styles.padding}>
                 {isSelected ? (
