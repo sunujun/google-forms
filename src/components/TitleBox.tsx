@@ -9,8 +9,8 @@ import MultiLineInput, { INPUT_TYPE } from './MultiLineInput';
 const TitleBox = () => {
     const [form, setForm] = useRecoilState(formState);
 
-    const [title, setTitle] = useState('제목 없는 설문지');
-    const [description, setDescription] = useState('');
+    const [title, setTitle] = useState(form.title);
+    const [description, setDescription] = useState(form.description);
 
     const isSelected = form.selectedID === 'FORM-1';
 

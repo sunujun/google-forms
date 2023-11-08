@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import uuid from 'react-native-uuid';
 import { useRecoilState } from 'recoil';
 
-import { ANSWER_TYPE, AnswerID, Button, QuestionBox, TitleBox } from 'components';
+import { ANSWER_TYPE, AnswerID, Button, CHOICE_ITEM_TYPE, QuestionBox, TitleBox } from 'components';
 import { formState, IQuestion } from 'states';
 
 const MakeFormScreen = () => {
@@ -22,6 +22,16 @@ const MakeFormScreen = () => {
             type,
             question: '',
             isRequired: false,
+            optionList:
+                type === ANSWER_TYPE.Short || type === ANSWER_TYPE.Long
+                    ? undefined
+                    : [
+                          {
+                              id: 'OPTION-' + uuid.v4(),
+                              type: CHOICE_ITEM_TYPE.Label,
+                              label: '옵션 1',
+                          },
+                      ],
         };
         const updatedQuestionList = [...form.questionList, newQuestion];
 
@@ -48,8 +58,10 @@ const MakeFormScreen = () => {
                         addQuestion(ANSWER_TYPE.Long);
                         break;
                     case 3:
+                        addQuestion(ANSWER_TYPE.Multiple);
                         break;
                     case 4:
+                        addQuestion(ANSWER_TYPE.CheckBox);
                         break;
                     default:
                         break;
@@ -77,6 +89,7 @@ const MakeFormScreen = () => {
     return (
         <View style={styles.container}>
             <DraggableFlatList
+                containerStyle={styles.flatListContainer}
                 data={form.questionList}
                 showsVerticalScrollIndicator={false}
                 keyExtractor={item => item.id}
@@ -112,6 +125,9 @@ const styles = StyleSheet.create({
         backgroundColor: '#673AB7',
         alignItems: 'center',
         justifyContent: 'center',
+    },
+    flatListContainer: {
+        flex: 1,
     },
 });
 

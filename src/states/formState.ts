@@ -1,6 +1,6 @@
 import { atom } from 'recoil';
 
-import { AnswerID } from 'components';
+import { AnswerID, ChoiceItemID } from 'components';
 
 export interface IForm {
     id: string;
@@ -14,12 +14,13 @@ export interface IQuestion {
     id: string;
     type: AnswerID;
     question: string;
-    choice?: IChoice[];
+    optionList?: IOption[];
     isRequired: boolean;
 }
 
-export interface IChoice {
+export interface IOption {
     id: string;
+    type: ChoiceItemID;
     label: string;
 }
 

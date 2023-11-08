@@ -1,1 +1,1 @@
-export { formState, IForm, IQuestion } from './formState';
+export { formState, IForm, IQuestion, IOption } from './formState';

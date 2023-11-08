@@ -4,3 +4,6 @@ export { INPUT_TYPE } from './MultiLineInput';
 export { default as Button } from './Button';
 export { default as QuestionBox } from './QuestionBox';
 export { ANSWER_TYPE, AnswerID } from './QuestionBox';
+export { default as SingleLineInput } from './SingleLineInput';
+export { default as MultipleChoiceItem } from './MultipleChoiceItem';
+export { CHOICE_ITEM_TYPE, ChoiceItemID } from './MultipleChoiceItem';

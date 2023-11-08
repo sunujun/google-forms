@@ -1,21 +1,13 @@
 import { useRef } from 'react';
 import { Animated, Easing, StyleSheet, TextInput, View } from 'react-native';
 
-export const INPUT_TYPE = {
-    Title: 'title',
-    Description: 'Description',
-    Question: 'Question',
-} as const;
-type InputID = (typeof INPUT_TYPE)[keyof typeof INPUT_TYPE];
-
-interface MultiLineInputProps {
-    type: InputID;
+interface SingleLineInputProps {
     placeholder?: string;
     value?: string;
     onChangeText?: (text: string) => void;
 }
 
-const MultiLineInput = ({ type, placeholder, value, onChangeText }: MultiLineInputProps) => {
+const SingleLineInput = ({ placeholder, value, onChangeText }: SingleLineInputProps) => {
     const scaleXAnimation = useRef(new Animated.Value(0)).current;
     const opacityAnimation = useRef(new Animated.Value(1)).current;
 
@@ -50,14 +42,7 @@ const MultiLineInput = ({ type, placeholder, value, onChangeText }: MultiLineInp
                 onChangeText={onChangeText}
                 placeholder={placeholder}
                 placeholderTextColor="#DADCE0"
-                multiline={true}
-                style={
-                    type === INPUT_TYPE.Title
-                        ? styles.title
-                        : type === INPUT_TYPE.Description
-                        ? styles.description
-                        : styles.question
-                }
+                style={styles.option}
                 onFocus={() => {
                     focusAnimation();
                 }}
@@ -74,35 +59,19 @@ const MultiLineInput = ({ type, placeholder, value, onChangeText }: MultiLineInp
 
 const styles = StyleSheet.create({
     container: {
-        marginBottom: 12,
+        flex: 1,
+        marginLeft: 8,
+        marginRight: 24,
     },
-    title: {
-        fontSize: 24,
-        letterSpacing: 0,
+    option: {
+        flex: 1,
+        fontSize: 14,
+        letterSpacing: 0.2,
+        lineHeight: 16,
         fontWeight: '400',
         color: '#202124',
         borderBottomWidth: 1,
         borderBottomColor: '#DADCE0',
-    },
-    description: {
-        fontSize: 11,
-        letterSpacing: 0,
-        lineHeight: 15,
-        fontWeight: '400',
-        color: '#202124',
-        borderBottomWidth: 1,
-        borderBottomColor: '#DADCE0',
-        marginTop: 8,
-    },
-    question: {
-        fontSize: 12,
-        letterSpacing: 0,
-        fontWeight: '400',
-        lineHeight: 18,
-        color: '#202124',
-        borderBottomWidth: 1,
-        borderBottomColor: '#DADCE0',
-        backgroundColor: '#F8F9FA',
     },
     focusedBottom: {
         position: 'absolute',
@@ -113,4 +82,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default MultiLineInput;
+export default SingleLineInput;

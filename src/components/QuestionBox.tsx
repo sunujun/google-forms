@@ -7,6 +7,7 @@ import { useRecoilState } from 'recoil';
 import { formState, IQuestion } from 'states';
 
 import MultiLineInput, { INPUT_TYPE } from './MultiLineInput';
+import MultipleChoiceItem, { CHOICE_ITEM_TYPE } from './MultipleChoiceItem';
 
 export const ANSWER_TYPE = {
     Short: 'short',
@@ -108,6 +109,13 @@ const QuestionBox = ({ item, type, onLongPress }: QuestionBoxProps) => {
                         </View>
                     </>
                 )}
+                {type === ANSWER_TYPE.Multiple &&
+                    item.optionList?.map(option => {
+                        return <MultipleChoiceItem key={option.id} item={option} />;
+                    })}
+                {type === ANSWER_TYPE.Multiple && (
+                    <MultipleChoiceItem item={{ id: 'ADD-1', label: '', type: CHOICE_ITEM_TYPE.Add }} />
+                )}
                 {isSelected && (
                     <View style={styles.utilsContainer}>
                         <Pressable
@@ -173,6 +181,7 @@ const styles = StyleSheet.create({
     },
     questionTextContainer: {
         flexDirection: 'row',
+        marginBottom: 12,
     },
     questionText: {
         fontSize: 12,
@@ -209,7 +218,6 @@ const styles = StyleSheet.create({
         letterSpacing: 0.2,
         lineHeight: 20,
         color: '#70757A',
-        marginTop: 12,
     },
     utilsContainer: {
         flexDirection: 'row',
