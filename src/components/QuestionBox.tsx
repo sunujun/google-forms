@@ -1,0 +1,184 @@
+import { useState } from 'react';
+import { Pressable, StyleSheet, Switch, Text, useWindowDimensions, View } from 'react-native';
+import Icon from '@expo/vector-icons/MaterialCommunityIcons';
+
+import MultiLineInput, { INPUT_TYPE } from './MultiLineInput';
+
+export const ANSWER_TYPE = {
+    Short: 'short',
+    Long: 'long',
+    Multiple: 'multiple',
+    CheckBox: 'checkBox',
+} as const;
+type AnswerID = (typeof ANSWER_TYPE)[keyof typeof ANSWER_TYPE];
+
+interface QuestionBoxProps {
+    type: AnswerID;
+}
+
+const QuestionBox = ({ type }: QuestionBoxProps) => {
+    const { width } = useWindowDimensions();
+
+    const [question, setQuestion] = useState('');
+    const [isSelected, setIsSelected] = useState(false);
+    const [isRequired, setIsRequired] = useState(false);
+
+    const toggleSwitch = () => {
+        setIsRequired(previousState => !previousState);
+    };
+
+    return (
+        <Pressable
+            style={styles.container}
+            onPress={() => {
+                // FIXME: 임시 테스트
+                setIsSelected(previousState => !previousState);
+            }}>
+            {isSelected && <View style={styles.selectedMark} />}
+            <View style={styles.padding}>
+                {isSelected ? (
+                    <MultiLineInput
+                        type={INPUT_TYPE.Question}
+                        placeholder="질문"
+                        value={question}
+                        onChangeText={setQuestion}
+                    />
+                ) : (
+                    <View style={styles.questionTextContainer}>
+                        <Text style={[styles.questionText, { maxWidth: width - 24 - 48 - 24 }]}>{question}</Text>
+                        {isRequired && <Text style={styles.requiredMark}>*</Text>}
+                    </View>
+                )}
+                {type === ANSWER_TYPE.Short && (
+                    <>
+                        <Text style={styles.answerText}>단답형 텍스트</Text>
+                        <View style={styles.shortDottedLine}>
+                            <View style={styles.dottedLine} />
+                        </View>
+                    </>
+                )}
+                {type === ANSWER_TYPE.Long && (
+                    <>
+                        <Text style={styles.answerText}>장문형 텍스트</Text>
+                        <View style={styles.longDottedLine}>
+                            <View style={styles.dottedLine} />
+                        </View>
+                    </>
+                )}
+                {isSelected && (
+                    <View style={styles.utilsContainer}>
+                        <Pressable style={styles.utilsButton}>
+                            <Icon name="content-copy" color="#5F6368" size={20} />
+                        </Pressable>
+                        <Pressable style={styles.utilsButton}>
+                            <Icon name="trash-can-outline" color="#5F6368" size={24} />
+                        </Pressable>
+                        <View style={styles.divider} />
+                        <Text style={styles.requireText}>필수</Text>
+                        <Switch
+                            trackColor={{ false: '#B9B9B9', true: '#F0EBF8' }}
+                            thumbColor={isRequired ? '#673AB7' : '#FAFAFA'}
+                            ios_backgroundColor="#F0EBF8"
+                            onValueChange={toggleSwitch}
+                            value={isRequired}
+                        />
+                    </View>
+                )}
+            </View>
+        </Pressable>
+    );
+};
+
+const styles = StyleSheet.create({
+    container: {
+        backgroundColor: '#FFFFFF',
+        marginVertical: 12,
+        borderWidth: 1,
+        borderColor: '#DADCE0',
+        borderRadius: 8,
+        minHeight: 28,
+    },
+    selectedMark: {
+        backgroundColor: '#4285F4',
+        borderTopLeftRadius: 8,
+        borderBottomLeftRadius: 8,
+        width: 6,
+        position: 'absolute',
+        height: '100%',
+    },
+    padding: {
+        padding: 24,
+        paddingTop: 22,
+    },
+    questionTextContainer: {
+        flexDirection: 'row',
+    },
+    questionText: {
+        fontSize: 12,
+        letterSpacing: 0,
+        lineHeight: 24,
+        fontWeight: '400',
+        color: '#202124',
+    },
+    requiredMark: {
+        color: '#D93025',
+        fontWeight: '400',
+        fontSize: 16,
+        paddingLeft: 4,
+        width: 24,
+    },
+    shortDottedLine: {
+        width: '50%',
+        height: 1,
+        overflow: 'hidden',
+    },
+    longDottedLine: {
+        width: '85%',
+        height: 1,
+        overflow: 'hidden',
+    },
+    dottedLine: {
+        borderStyle: 'dotted',
+        borderWidth: 1,
+        borderColor: '#00000061',
+    },
+    answerText: {
+        fontSize: 14,
+        fontWeight: '400',
+        letterSpacing: 0.2,
+        lineHeight: 20,
+        color: '#70757A',
+        marginTop: 12,
+    },
+    utilsContainer: {
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        marginTop: 28,
+        borderTopColor: '#DADCE0',
+        borderTopWidth: 1,
+        alignItems: 'center',
+        marginBottom: -24,
+    },
+    utilsButton: {
+        width: 48,
+        height: 52,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    divider: {
+        width: 1,
+        height: 24,
+        marginRight: 16,
+        backgroundColor: '#DADCE0',
+    },
+    requireText: {
+        fontSize: 14,
+        fontWeight: '400',
+        letterSpacing: 0.2,
+        lineHeight: 20,
+        color: '#202124',
+        marginRight: 8,
+    },
+});
+
+export default QuestionBox;

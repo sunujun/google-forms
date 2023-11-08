@@ -4,6 +4,7 @@ import { Animated, Easing, StyleSheet, TextInput, View } from 'react-native';
 export const INPUT_TYPE = {
     Title: 'title',
     Description: 'Description',
+    Question: 'Question',
 } as const;
 type InputID = (typeof INPUT_TYPE)[keyof typeof INPUT_TYPE];
 
@@ -50,7 +51,13 @@ const MultiLineInput = ({ type, placeholder, value, onChangeText }: MultiLineInp
                 placeholder={placeholder}
                 placeholderTextColor="#DADCE0"
                 multiline={true}
-                style={type === INPUT_TYPE.Title ? styles.title : styles.description}
+                style={
+                    type === INPUT_TYPE.Title
+                        ? styles.title
+                        : type === INPUT_TYPE.Description
+                        ? styles.description
+                        : styles.question
+                }
                 onFocus={() => {
                     focusAnimation();
                 }}
@@ -69,6 +76,8 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 24,
         letterSpacing: 0,
+        fontWeight: '400',
+        color: '#202124',
         borderBottomWidth: 1,
         borderBottomColor: '#DADCE0',
     },
@@ -76,9 +85,21 @@ const styles = StyleSheet.create({
         fontSize: 11,
         letterSpacing: 0,
         lineHeight: 15,
+        fontWeight: '400',
+        color: '#202124',
         borderBottomWidth: 1,
         borderBottomColor: '#DADCE0',
         marginTop: 8,
+    },
+    question: {
+        fontSize: 12,
+        letterSpacing: 0,
+        fontWeight: '400',
+        lineHeight: 24,
+        color: '#202124',
+        borderBottomWidth: 1,
+        borderBottomColor: '#DADCE0',
+        backgroundColor: '#F8F9FA',
     },
     focusedBottom: {
         position: 'absolute',

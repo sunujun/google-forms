@@ -3,14 +3,14 @@ import { useActionSheet } from '@expo/react-native-action-sheet';
 import Icon from '@expo/vector-icons/MaterialCommunityIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Button, TitleBox } from 'components';
+import { ANSWER_TYPE, Button, QuestionBox, TitleBox } from 'components';
 
 const MakeFormScreen = () => {
     const safeAreaInset = useSafeAreaInsets();
     const { showActionSheetWithOptions } = useActionSheet();
 
     const onPressFloatingButton = () => {
-        const options = ['취소', '단답형', '장문형', '객관식 질문', '드롭다운'];
+        const options = ['취소', '단답형', '장문형', '객관식 질문', '체크박스'];
         const cancelButtonIndex = 0;
 
         showActionSheetWithOptions(
@@ -40,6 +40,7 @@ const MakeFormScreen = () => {
     return (
         <View style={styles.container}>
             <TitleBox />
+            <QuestionBox type={ANSWER_TYPE.Long} />
             <View style={[styles.floatingButtonContainer, { bottom: safeAreaInset.bottom + 24 }]}>
                 <Button onPress={onPressFloatingButton}>
                     <View style={styles.floatingButton}>
