@@ -89,7 +89,9 @@ const QuestionBox = ({ item, type, onLongPress }: QuestionBoxProps) => {
                     />
                 ) : (
                     <View style={styles.questionTextContainer}>
-                        <Text style={[styles.questionText, { maxWidth: width - 24 - 48 - 24 }]}>{question}</Text>
+                        <Text style={[styles.questionText, { maxWidth: width - 24 - 48 - 24 }]}>
+                            {question === '' ? '질문' : question}
+                        </Text>
                         {isRequired && <Text style={styles.requiredMark}>*</Text>}
                     </View>
                 )}
@@ -181,12 +183,12 @@ const styles = StyleSheet.create({
     },
     questionTextContainer: {
         flexDirection: 'row',
-        marginBottom: 12,
+        marginBottom: 20,
     },
     questionText: {
-        fontSize: 12,
-        letterSpacing: 0,
-        lineHeight: 24,
+        fontSize: 14,
+        letterSpacing: 0.2,
+        lineHeight: 16,
         fontWeight: '400',
         color: '#202124',
     },

@@ -95,10 +95,10 @@ const styles = StyleSheet.create({
         marginTop: 8,
     },
     question: {
-        fontSize: 12,
-        letterSpacing: 0,
+        fontSize: 14,
+        letterSpacing: 0.2,
+        lineHeight: 16,
         fontWeight: '400',
-        lineHeight: 18,
         color: '#202124',
         borderBottomWidth: 1,
         borderBottomColor: '#DADCE0',
