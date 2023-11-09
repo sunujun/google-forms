@@ -165,13 +165,15 @@ const MultipleChoiceItem = ({ item, questionID, questionType }: MultipleChoiceIt
 
     return (
         <View style={styles.container}>
-            <Pressable onPress={onPressCheckBox}>
-                {questionType === ANSWER_TYPE.Multiple ? (
-                    <Icon name="checkbox-blank-circle-outline" color="#BDBDBD" size={24} />
-                ) : (
-                    <Icon name="checkbox-blank-outline" color="#BDBDBD" size={24} />
-                )}
-            </Pressable>
+            {!(!isQuestionSelected && item.type === CHOICE_ITEM_TYPE.Add) && (
+                <Pressable onPress={onPressCheckBox}>
+                    {questionType === ANSWER_TYPE.Multiple ? (
+                        <Icon name="checkbox-blank-circle-outline" color="#BDBDBD" size={24} />
+                    ) : (
+                        <Icon name="checkbox-blank-outline" color="#BDBDBD" size={24} />
+                    )}
+                </Pressable>
+            )}
             {item.type === CHOICE_ITEM_TYPE.Label && isQuestionSelected && (
                 <SingleLineInput
                     inputRef={labelInputRef}
@@ -185,7 +187,7 @@ const MultipleChoiceItem = ({ item, questionID, questionType }: MultipleChoiceIt
                 <Text style={styles.labelText}>{item.label}</Text>
             )}
             {item.type === CHOICE_ITEM_TYPE.ETC && <Text style={styles.etcOptionText}>{item.label}</Text>}
-            {item.type === CHOICE_ITEM_TYPE.Add && (
+            {isQuestionSelected && item.type === CHOICE_ITEM_TYPE.Add && (
                 <View style={styles.addButton}>
                     <Pressable onPress={addOption}>
                         <Text style={styles.addOptionText}>옵션 추가</Text>
