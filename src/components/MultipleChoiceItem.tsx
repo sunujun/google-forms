@@ -31,6 +31,7 @@ const MultipleChoiceItem = ({ item, questionID }: MultipleChoiceItemProps) => {
     const hasETCOption = optionList.some(option => option.type === CHOICE_ITEM_TYPE.ETC);
     const optionCount = optionList.filter(option => option.type === CHOICE_ITEM_TYPE.Label).length;
     const hasClose = item.type === CHOICE_ITEM_TYPE.ETC || (item.type === CHOICE_ITEM_TYPE.Label && optionCount > 1);
+    const isQuestionSelected = questionID === form.selectedID;
 
     const updateLabelOption = useCallback(
         (label: string) => {
@@ -145,8 +146,11 @@ const MultipleChoiceItem = ({ item, questionID }: MultipleChoiceItemProps) => {
             <Pressable onPress={onPressCheckBox}>
                 <Icon name="checkbox-blank-circle-outline" color="#BDBDBD" size={24} />
             </Pressable>
-            {item.type === CHOICE_ITEM_TYPE.Label && (
+            {item.type === CHOICE_ITEM_TYPE.Label && isQuestionSelected && (
                 <SingleLineInput inputRef={labelInputRef} value={item.label} onChangeText={updateLabelOption} />
+            )}
+            {item.type === CHOICE_ITEM_TYPE.Label && !isQuestionSelected && (
+                <Text style={styles.labelText}>{item.label}</Text>
             )}
             {item.type === CHOICE_ITEM_TYPE.ETC && <Text style={styles.etcOptionText}>{item.label}</Text>}
             {item.type === CHOICE_ITEM_TYPE.Add && (
@@ -164,7 +168,7 @@ const MultipleChoiceItem = ({ item, questionID }: MultipleChoiceItemProps) => {
                     )}
                 </View>
             )}
-            {hasClose && (
+            {isQuestionSelected && hasClose && (
                 <Pressable onPress={deleteOption}>
                     <Icon name="close" color="#5F6368" size={24} />
                 </Pressable>
@@ -215,6 +219,16 @@ const styles = StyleSheet.create({
         fontWeight: '400',
         lineHeight: 20,
         color: '#1A73E8',
+    },
+    labelText: {
+        marginLeft: 8,
+        fontSize: 14,
+        letterSpacing: 0.2,
+        lineHeight: 16,
+        fontWeight: '400',
+        color: '#202124',
+        alignSelf: 'center',
+        flex: 1,
     },
 });
 
