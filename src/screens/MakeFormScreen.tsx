@@ -91,6 +91,7 @@ const MakeFormScreen = () => {
         <View style={styles.container}>
             <DraggableFlatList
                 containerStyle={styles.flatListContainer}
+                contentContainerStyle={{ paddingBottom: safeAreaInset.bottom }}
                 data={form.questionList}
                 showsVerticalScrollIndicator={false}
                 keyExtractor={item => item.id}

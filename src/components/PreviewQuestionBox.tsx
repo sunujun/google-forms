@@ -3,9 +3,10 @@ import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import Icon from '@expo/vector-icons/MaterialCommunityIcons';
 import { useRecoilState } from 'recoil';
 
-import { ANSWER_TYPE } from 'constant';
+import { ANSWER_TYPE, INPUT_TYPE } from 'constant';
 import { formState, IQuestion } from 'states';
 
+import MultiLineInput from './MultiLineInput';
 import SingleLineInput from './SingleLineInput';
 
 interface PreviewQuestionBoxProps {
@@ -26,30 +27,45 @@ const PreviewQuestionBox = ({ item }: PreviewQuestionBoxProps) => {
                     {item.isRequired && <Text style={styles.requiredMark}>*</Text>}
                 </View>
                 {item.type === ANSWER_TYPE.Short && (
-                    <>
-                        <View style={styles.shortInput}>
-                            <SingleLineInput
-                                placeholder="내 답변"
-                                value={answer}
-                                // TODO: error 상태에서 입력되면 error 해제
-                                onChangeText={setAnswer}
-                                isError={item.isRequired ? checkIsRequired : undefined}
-                                onBlur={() => {
-                                    if (item.isRequired && answer === '') {
-                                        setCheckIsRequired(true);
-                                    } else {
-                                        setCheckIsRequired(false);
-                                    }
-                                }}
-                            />
-                        </View>
-                        {checkIsRequired && (
-                            <View style={styles.requiredContainer}>
-                                <Icon name="alert-circle-outline" color="#D93025" size={24} />
-                                <Text style={styles.requiredText}>필수 질문입니다.</Text>
-                            </View>
-                        )}
-                    </>
+                    <View style={styles.shortInput}>
+                        <SingleLineInput
+                            placeholder="내 답변"
+                            value={answer}
+                            // TODO: error 상태에서 입력되면 error 해제
+                            onChangeText={setAnswer}
+                            isError={item.isRequired ? checkIsRequired : undefined}
+                            onBlur={() => {
+                                if (item.isRequired && answer === '') {
+                                    setCheckIsRequired(true);
+                                } else {
+                                    setCheckIsRequired(false);
+                                }
+                            }}
+                        />
+                    </View>
+                )}
+                {item.type === ANSWER_TYPE.Long && (
+                    <MultiLineInput
+                        placeholder="내 답변"
+                        value={answer}
+                        type={INPUT_TYPE.Answer}
+                        // TODO: error 상태에서 입력되면 error 해제
+                        onChangeText={setAnswer}
+                        isError={item.isRequired ? checkIsRequired : undefined}
+                        onBlur={() => {
+                            if (item.isRequired && answer === '') {
+                                setCheckIsRequired(true);
+                            } else {
+                                setCheckIsRequired(false);
+                            }
+                        }}
+                    />
+                )}
+                {checkIsRequired && (
+                    <View style={styles.requiredContainer}>
+                        <Icon name="alert-circle-outline" color="#D93025" size={24} />
+                        <Text style={styles.requiredText}>필수 질문입니다.</Text>
+                    </View>
                 )}
             </View>
         </View>

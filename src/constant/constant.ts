@@ -2,6 +2,7 @@ export const INPUT_TYPE = {
     Title: 'title',
     Description: 'Description',
     Question: 'Question',
+    Answer: 'Answer',
 } as const;
 export type InputID = (typeof INPUT_TYPE)[keyof typeof INPUT_TYPE];
 

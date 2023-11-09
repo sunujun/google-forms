@@ -16,12 +16,22 @@ interface MultiLineInputProps {
     type: InputID;
     placeholder?: string;
     value?: string;
+    isError?: boolean;
     onChangeText?: (text: string) => void;
     onFocus?: (e: NativeSyntheticEvent<TextInputFocusEventData>) => void;
     onBlur?: (e: NativeSyntheticEvent<TextInputFocusEventData>) => void;
 }
 
-const MultiLineInput = ({ inputRef, type, placeholder, value, onChangeText, onFocus, onBlur }: MultiLineInputProps) => {
+const MultiLineInput = ({
+    inputRef,
+    type,
+    placeholder,
+    value,
+    isError,
+    onChangeText,
+    onFocus,
+    onBlur,
+}: MultiLineInputProps) => {
     const scaleXAnimation = useRef(new Animated.Value(0)).current;
     const opacityAnimation = useRef(new Animated.Value(1)).current;
 
@@ -77,13 +87,20 @@ const MultiLineInput = ({ inputRef, type, placeholder, value, onChangeText, onFo
                         ? styles.title
                         : type === INPUT_TYPE.Description
                         ? styles.description
-                        : styles.question
+                        : type === INPUT_TYPE.Question
+                        ? styles.question
+                        : isError
+                        ? styles.errorAnswer
+                        : styles.answer
                 }
                 onFocus={handleFocus}
                 onBlur={handleBlur}
             />
             <Animated.View
-                style={[styles.focusedBottom, { opacity: opacityAnimation, transform: [{ scaleX: scaleXAnimation }] }]}
+                style={[
+                    isError ? styles.errorBottom : styles.focusedBottom,
+                    { opacity: opacityAnimation, transform: [{ scaleX: scaleXAnimation }] },
+                ]}
             />
         </View>
     );
@@ -121,12 +138,37 @@ const styles = StyleSheet.create({
         borderBottomColor: '#DADCE0',
         backgroundColor: '#F8F9FA',
     },
+    answer: {
+        fontSize: 14,
+        letterSpacing: 0.2,
+        lineHeight: 16,
+        fontWeight: '400',
+        color: '#202124',
+        borderBottomWidth: 1,
+        borderBottomColor: '#DADCE0',
+    },
+    errorAnswer: {
+        fontSize: 14,
+        letterSpacing: 0.2,
+        lineHeight: 16,
+        fontWeight: '400',
+        color: '#202124',
+        borderBottomWidth: 1,
+        borderBottomColor: '#D93025',
+    },
     focusedBottom: {
         position: 'absolute',
         bottom: -1,
         height: 2,
         width: '100%',
         backgroundColor: '#673AB7',
+    },
+    errorBottom: {
+        position: 'absolute',
+        bottom: -1,
+        height: 2,
+        width: '100%',
+        backgroundColor: '#D93025',
     },
 });
 

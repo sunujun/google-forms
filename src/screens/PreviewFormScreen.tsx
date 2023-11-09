@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRecoilValue } from 'recoil';
 
 import { PreviewQuestionBox, PreviewTitleBox } from 'components';
@@ -7,6 +8,7 @@ import { formState, IQuestion } from 'states';
 
 const PreviewFormScreen = () => {
     const form = useRecoilValue(formState);
+    const safeAreaInset = useSafeAreaInsets();
 
     const ListHeaderComponent = useCallback(() => {
         return <PreviewTitleBox />;
@@ -19,7 +21,7 @@ const PreviewFormScreen = () => {
     return (
         <View style={styles.container}>
             <FlatList
-                contentContainerStyle={styles.flatListContainer}
+                contentContainerStyle={{ paddingBottom: safeAreaInset.bottom }}
                 data={form.questionList}
                 showsVerticalScrollIndicator={false}
                 keyExtractor={item => item.id}

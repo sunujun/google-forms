@@ -81,7 +81,7 @@ const SingleLineInput = ({
                 onChangeText={onChangeText}
                 placeholder={placeholder}
                 placeholderTextColor="#DADCE0"
-                style={styles.option}
+                style={isError ? styles.errorOption : styles.option}
                 onFocus={handleFocus}
                 onBlur={handleBlur}
             />
@@ -108,6 +108,16 @@ const styles = StyleSheet.create({
         color: '#202124',
         borderBottomWidth: 1,
         borderBottomColor: '#DADCE0',
+    },
+    errorOption: {
+        flex: 1,
+        fontSize: 14,
+        letterSpacing: 0.2,
+        lineHeight: 16,
+        fontWeight: '400',
+        color: '#202124',
+        borderBottomWidth: 1,
+        borderBottomColor: '#D93025',
     },
     focusedBottom: {
         position: 'absolute',
