@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { GestureResponderEvent, Pressable, StyleSheet, Switch, Text, useWindowDimensions, View } from 'react-native';
 import Icon from '@expo/vector-icons/MaterialCommunityIcons';
 import uuid from 'react-native-uuid';
@@ -27,24 +26,30 @@ const QuestionBox = ({ item, type, onLongPress }: QuestionBoxProps) => {
     const { width } = useWindowDimensions();
     const [form, setForm] = useRecoilState(formState);
 
-    const [question, setQuestion] = useState(item.question);
-    const [isRequired, setIsRequired] = useState(item.isRequired);
-
     const isSelected = form.selectedID === item.id;
     const questionList = form.questionList;
     const currentIndex = questionList.findIndex(questionItem => questionItem.id === item.id);
 
-    useEffect(() => {
-        setForm(previousState => ({
-            ...previousState,
-            questionList: previousState.questionList.map(questionItem =>
-                questionItem.id === item.id ? { ...questionItem, question, isRequired } : questionItem,
-            ),
-        }));
-    }, [isRequired, item.id, question, setForm]);
+    const updateQuestion = (question: string) => {
+        setForm(previousState => {
+            return {
+                ...previousState,
+                questionList: previousState.questionList.map(questionItem =>
+                    questionItem.id === item.id ? { ...questionItem, question } : questionItem,
+                ),
+            };
+        });
+    };
 
-    const toggleSwitch = () => {
-        setIsRequired(previousState => !previousState);
+    const updateIsRequired = (isRequired: boolean) => {
+        setForm(previousState => {
+            return {
+                ...previousState,
+                questionList: previousState.questionList.map(questionItem =>
+                    questionItem.id === item.id ? { ...questionItem, isRequired } : questionItem,
+                ),
+            };
+        });
     };
 
     const deleteQuestion = () => {
@@ -84,15 +89,15 @@ const QuestionBox = ({ item, type, onLongPress }: QuestionBoxProps) => {
                     <MultiLineInput
                         type={INPUT_TYPE.Question}
                         placeholder="질문"
-                        value={question}
-                        onChangeText={setQuestion}
+                        value={item.question}
+                        onChangeText={updateQuestion}
                     />
                 ) : (
                     <View style={styles.questionTextContainer}>
                         <Text style={[styles.questionText, { maxWidth: width - 24 - 48 - 24 }]}>
-                            {question === '' ? '질문' : question}
+                            {item.question === '' ? '질문' : item.question}
                         </Text>
-                        {isRequired && <Text style={styles.requiredMark}>*</Text>}
+                        {item.isRequired && <Text style={styles.requiredMark}>*</Text>}
                     </View>
                 )}
                 {type === ANSWER_TYPE.Short && (
@@ -151,10 +156,10 @@ const QuestionBox = ({ item, type, onLongPress }: QuestionBoxProps) => {
                         <Text style={styles.requireText}>필수</Text>
                         <Switch
                             trackColor={{ false: '#B9B9B9', true: '#F0EBF8' }}
-                            thumbColor={isRequired ? '#673AB7' : '#FAFAFA'}
+                            thumbColor={item.isRequired ? '#673AB7' : '#FAFAFA'}
                             ios_backgroundColor="#F0EBF8"
-                            onValueChange={toggleSwitch}
-                            value={isRequired}
+                            onValueChange={updateIsRequired}
+                            value={item.isRequired}
                         />
                     </View>
                 )}

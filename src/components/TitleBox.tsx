@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRecoilState } from 'recoil';
 
@@ -9,30 +9,28 @@ import MultiLineInput, { INPUT_TYPE } from './MultiLineInput';
 const TitleBox = () => {
     const [form, setForm] = useRecoilState(formState);
 
-    const [title, setTitle] = useState(form.title);
-    const [description, setDescription] = useState(form.description);
-
     const isSelected = form.selectedID === 'FORM-1';
 
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            if (title === '') {
-                setTitle('제목 없는 설문지');
-            }
-        }, 300);
+    const updateTitle = useCallback(
+        (title: string) => {
+            setForm(previousState => {
+                return {
+                    ...previousState,
+                    title,
+                };
+            });
+        },
+        [setForm],
+    );
 
-        return () => clearTimeout(timer);
-    }, [title]);
-
-    useEffect(() => {
+    const updateDescription = (description: string) => {
         setForm(previousState => {
             return {
                 ...previousState,
-                title,
                 description,
             };
         });
-    }, [description, setForm, title]);
+    };
 
     const onPressTitleBox = () => {
         setForm(previousState => {
@@ -43,6 +41,16 @@ const TitleBox = () => {
         });
     };
 
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (form.title === '') {
+                updateTitle('제목 없는 설문지');
+            }
+        }, 300);
+
+        return () => clearTimeout(timer);
+    }, [form.title, updateTitle]);
+
     return (
         <Pressable style={styles.container} onPress={onPressTitleBox}>
             {isSelected && <View style={styles.selectedMark} />}
@@ -52,21 +60,21 @@ const TitleBox = () => {
                     <MultiLineInput
                         type={INPUT_TYPE.Title}
                         placeholder="설문지 제목"
-                        value={title}
-                        onChangeText={setTitle}
+                        value={form.title}
+                        onChangeText={updateTitle}
                     />
                 ) : (
-                    <Text style={styles.title}>{title}</Text>
+                    <Text style={styles.title}>{form.title}</Text>
                 )}
                 {isSelected ? (
                     <MultiLineInput
                         type={INPUT_TYPE.Description}
                         placeholder="설문지 설명"
-                        value={description}
-                        onChangeText={setDescription}
+                        value={form.description}
+                        onChangeText={updateDescription}
                     />
                 ) : (
-                    <Text style={styles.description}>{description}</Text>
+                    <Text style={styles.description}>{form.description}</Text>
                 )}
             </View>
         </Pressable>
