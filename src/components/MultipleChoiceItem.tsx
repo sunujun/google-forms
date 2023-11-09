@@ -4,23 +4,18 @@ import Icon from '@expo/vector-icons/MaterialCommunityIcons';
 import uuid from 'react-native-uuid';
 import { useRecoilState } from 'recoil';
 
+import { ANSWER_TYPE, AnswerID, CHOICE_ITEM_TYPE } from 'constant';
 import { formState, IOption } from 'states';
 
 import SingleLineInput from './SingleLineInput';
 
-export const CHOICE_ITEM_TYPE = {
-    Label: 'label',
-    ETC: 'etc',
-    Add: 'add',
-} as const;
-export type ChoiceItemID = (typeof CHOICE_ITEM_TYPE)[keyof typeof CHOICE_ITEM_TYPE];
-
 interface MultipleChoiceItemProps {
     item: IOption;
     questionID: string;
+    questionType: AnswerID;
 }
 
-const MultipleChoiceItem = ({ item, questionID }: MultipleChoiceItemProps) => {
+const MultipleChoiceItem = ({ item, questionID, questionType }: MultipleChoiceItemProps) => {
     const [form, setForm] = useRecoilState(formState);
     const labelInputRef = useRef<TextInput>(null);
 
@@ -144,7 +139,11 @@ const MultipleChoiceItem = ({ item, questionID }: MultipleChoiceItemProps) => {
     return (
         <View style={styles.container}>
             <Pressable onPress={onPressCheckBox}>
-                <Icon name="checkbox-blank-circle-outline" color="#BDBDBD" size={24} />
+                {questionType === ANSWER_TYPE.Multiple ? (
+                    <Icon name="checkbox-blank-circle-outline" color="#BDBDBD" size={24} />
+                ) : (
+                    <Icon name="checkbox-blank-outline" color="#BDBDBD" size={24} />
+                )}
             </Pressable>
             {item.type === CHOICE_ITEM_TYPE.Label && isQuestionSelected && (
                 <SingleLineInput inputRef={labelInputRef} value={item.label} onChangeText={updateLabelOption} />

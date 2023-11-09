@@ -7,7 +7,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import uuid from 'react-native-uuid';
 import { useRecoilState } from 'recoil';
 
-import { ANSWER_TYPE, AnswerID, Button, CHOICE_ITEM_TYPE, QuestionBox, TitleBox } from 'components';
+import { Button, QuestionBox, TitleBox } from 'components';
+import { ANSWER_TYPE, AnswerID, CHOICE_ITEM_TYPE } from 'constant';
 import { formState, IQuestion } from 'states';
 
 const MakeFormScreen = () => {
@@ -77,7 +78,7 @@ const MakeFormScreen = () => {
     const renderItem = ({ item, drag }: RenderItemParams<IQuestion>) => {
         return (
             <OpacityDecorator>
-                <QuestionBox item={item} type={item.type} onLongPress={drag} />
+                <QuestionBox item={item} onLongPress={drag} />
             </OpacityDecorator>
         );
     };

@@ -1,6 +1,6 @@
 import { atom } from 'recoil';
 
-import { AnswerID, ChoiceItemID } from 'components';
+import { AnswerID, ChoiceItemID } from 'constant';
 
 export interface IForm {
     id: string;

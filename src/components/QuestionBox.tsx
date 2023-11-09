@@ -3,26 +3,18 @@ import Icon from '@expo/vector-icons/MaterialCommunityIcons';
 import uuid from 'react-native-uuid';
 import { useRecoilState } from 'recoil';
 
+import { ANSWER_TYPE, CHOICE_ITEM_TYPE, INPUT_TYPE } from 'constant';
 import { formState, IQuestion } from 'states';
 
-import MultiLineInput, { INPUT_TYPE } from './MultiLineInput';
-import MultipleChoiceItem, { CHOICE_ITEM_TYPE } from './MultipleChoiceItem';
-
-export const ANSWER_TYPE = {
-    Short: 'short',
-    Long: 'long',
-    Multiple: 'multiple',
-    CheckBox: 'checkBox',
-} as const;
-export type AnswerID = (typeof ANSWER_TYPE)[keyof typeof ANSWER_TYPE];
+import MultiLineInput from './MultiLineInput';
+import MultipleChoiceItem from './MultipleChoiceItem';
 
 interface QuestionBoxProps {
     item: IQuestion;
-    type: AnswerID;
     onLongPress?: ((event: GestureResponderEvent) => void) | null;
 }
 
-const QuestionBox = ({ item, type, onLongPress }: QuestionBoxProps) => {
+const QuestionBox = ({ item, onLongPress }: QuestionBoxProps) => {
     const { width } = useWindowDimensions();
     const [form, setForm] = useRecoilState(formState);
 
@@ -100,7 +92,7 @@ const QuestionBox = ({ item, type, onLongPress }: QuestionBoxProps) => {
                         {item.isRequired && <Text style={styles.requiredMark}>*</Text>}
                     </View>
                 )}
-                {type === ANSWER_TYPE.Short && (
+                {item.type === ANSWER_TYPE.Short && (
                     <>
                         <Text style={styles.answerText}>단답형 텍스트</Text>
                         <View style={styles.shortDottedLine}>
@@ -108,7 +100,7 @@ const QuestionBox = ({ item, type, onLongPress }: QuestionBoxProps) => {
                         </View>
                     </>
                 )}
-                {type === ANSWER_TYPE.Long && (
+                {item.type === ANSWER_TYPE.Long && (
                     <>
                         <Text style={styles.answerText}>장문형 텍스트</Text>
                         <View style={styles.longDottedLine}>
@@ -116,14 +108,22 @@ const QuestionBox = ({ item, type, onLongPress }: QuestionBoxProps) => {
                         </View>
                     </>
                 )}
-                {type === ANSWER_TYPE.Multiple &&
+                {(item.type === ANSWER_TYPE.Multiple || item.type === ANSWER_TYPE.CheckBox) &&
                     item.optionList?.map(option => {
-                        return <MultipleChoiceItem key={option.id} item={option} questionID={item.id} />;
+                        return (
+                            <MultipleChoiceItem
+                                key={option.id}
+                                item={option}
+                                questionID={item.id}
+                                questionType={item.type}
+                            />
+                        );
                     })}
-                {type === ANSWER_TYPE.Multiple && (
+                {(item.type === ANSWER_TYPE.Multiple || item.type === ANSWER_TYPE.CheckBox) && (
                     <MultipleChoiceItem
                         item={{ id: 'ADD-1', label: '', type: CHOICE_ITEM_TYPE.Add }}
                         questionID={item.id}
+                        questionType={item.type}
                     />
                 )}
                 {isSelected && (

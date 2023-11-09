@@ -2,9 +2,10 @@ import { useCallback, useEffect } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRecoilState } from 'recoil';
 
+import { INPUT_TYPE } from 'constant';
 import { formState } from 'states';
 
-import MultiLineInput, { INPUT_TYPE } from './MultiLineInput';
+import MultiLineInput from './MultiLineInput';
 
 const TitleBox = () => {
     const [form, setForm] = useRecoilState(formState);

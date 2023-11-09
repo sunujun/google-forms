@@ -1,12 +1,7 @@
 import { useRef } from 'react';
 import { Animated, Easing, StyleSheet, TextInput, View } from 'react-native';
 
-export const INPUT_TYPE = {
-    Title: 'title',
-    Description: 'Description',
-    Question: 'Question',
-} as const;
-type InputID = (typeof INPUT_TYPE)[keyof typeof INPUT_TYPE];
+import { INPUT_TYPE, InputID } from 'constant';
 
 interface MultiLineInputProps {
     type: InputID;
