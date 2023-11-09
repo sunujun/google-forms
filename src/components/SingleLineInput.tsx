@@ -2,12 +2,13 @@ import { useRef } from 'react';
 import { Animated, Easing, StyleSheet, TextInput, View } from 'react-native';
 
 interface SingleLineInputProps {
+    inputRef?: React.LegacyRef<TextInput>;
     placeholder?: string;
     value?: string;
     onChangeText?: (text: string) => void;
 }
 
-const SingleLineInput = ({ placeholder, value, onChangeText }: SingleLineInputProps) => {
+const SingleLineInput = ({ inputRef, placeholder, value, onChangeText }: SingleLineInputProps) => {
     const scaleXAnimation = useRef(new Animated.Value(0)).current;
     const opacityAnimation = useRef(new Animated.Value(1)).current;
 
@@ -37,6 +38,7 @@ const SingleLineInput = ({ placeholder, value, onChangeText }: SingleLineInputPr
     return (
         <View style={styles.container}>
             <TextInput
+                ref={inputRef}
                 autoCorrect={false}
                 value={value}
                 onChangeText={onChangeText}

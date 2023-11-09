@@ -14,7 +14,7 @@ export interface IQuestion {
     id: string;
     type: AnswerID;
     question: string;
-    optionList?: IOption[];
+    optionList: IOption[];
     isRequired: boolean;
 }
 

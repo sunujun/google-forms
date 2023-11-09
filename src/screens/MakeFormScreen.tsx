@@ -24,7 +24,7 @@ const MakeFormScreen = () => {
             isRequired: false,
             optionList:
                 type === ANSWER_TYPE.Short || type === ANSWER_TYPE.Long
-                    ? undefined
+                    ? []
                     : [
                           {
                               id: 'OPTION-' + uuid.v4(),

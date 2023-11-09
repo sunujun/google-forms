@@ -49,7 +49,7 @@ const QuestionBox = ({ item, type, onLongPress }: QuestionBoxProps) => {
 
     const deleteQuestion = () => {
         const willSelectID = currentIndex === 0 ? form.id : questionList[currentIndex - 1].id;
-        const updatedQuestionList: IQuestion[] = questionList.filter(questionItem => questionItem.id !== item.id);
+        const updatedQuestionList = questionList.filter(questionItem => questionItem.id !== item.id);
 
         setForm({ ...form, questionList: updatedQuestionList, selectedID: willSelectID });
     };
@@ -57,7 +57,7 @@ const QuestionBox = ({ item, type, onLongPress }: QuestionBoxProps) => {
     const copyQuestion = () => {
         const newID = 'QUESTION-' + uuid.v4();
         const copiedQuestion: IQuestion = { ...item, id: newID };
-        const updatedQuestionList: IQuestion[] = [
+        const updatedQuestionList = [
             ...questionList.slice(0, currentIndex + 1),
             copiedQuestion,
             ...questionList.slice(currentIndex + 1),
@@ -113,10 +113,13 @@ const QuestionBox = ({ item, type, onLongPress }: QuestionBoxProps) => {
                 )}
                 {type === ANSWER_TYPE.Multiple &&
                     item.optionList?.map(option => {
-                        return <MultipleChoiceItem key={option.id} item={option} />;
+                        return <MultipleChoiceItem key={option.id} item={option} questionID={item.id} />;
                     })}
                 {type === ANSWER_TYPE.Multiple && (
-                    <MultipleChoiceItem item={{ id: 'ADD-1', label: '', type: CHOICE_ITEM_TYPE.Add }} />
+                    <MultipleChoiceItem
+                        item={{ id: 'ADD-1', label: '', type: CHOICE_ITEM_TYPE.Add }}
+                        questionID={item.id}
+                    />
                 )}
                 {isSelected && (
                     <View style={styles.utilsContainer}>
