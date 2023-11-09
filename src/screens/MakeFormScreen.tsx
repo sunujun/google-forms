@@ -126,6 +126,14 @@ const styles = StyleSheet.create({
         backgroundColor: '#673AB7',
         alignItems: 'center',
         justifyContent: 'center',
+        shadowColor: '#000000',
+        shadowOffset: {
+            width: 5,
+            height: 5,
+        },
+        shadowOpacity: 0.2,
+        shadowRadius: 10,
+        elevation: 0.4,
     },
     flatListContainer: {
         flex: 1,
