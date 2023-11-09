@@ -189,6 +189,7 @@ const MultipleChoiceItem = ({ item, questionID, questionType }: MultipleChoiceIt
             )}
             {item.type === CHOICE_ITEM_TYPE.Label && isQuestionSelected && (
                 <SingleLineInput
+                    style={styles.singleLineInputContainer}
                     inputRef={labelInputRef}
                     value={item.label}
                     isError={isError}
@@ -293,6 +294,10 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         alignItems: 'center',
         justifyContent: 'center',
+    },
+    singleLineInputContainer: {
+        marginLeft: 8,
+        marginRight: 24,
     },
 });
 

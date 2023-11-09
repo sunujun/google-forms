@@ -5,3 +5,4 @@ export { default as QuestionBox } from './QuestionBox';
 export { default as SingleLineInput } from './SingleLineInput';
 export { default as MultipleChoiceItem } from './MultipleChoiceItem';
 export { default as PreviewTitleBox } from './PreviewTitleBox';
+export { default as PreviewQuestionBox } from './PreviewQuestionBox';

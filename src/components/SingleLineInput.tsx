@@ -3,14 +3,17 @@ import {
     Animated,
     Easing,
     NativeSyntheticEvent,
+    StyleProp,
     StyleSheet,
     TextInput,
     TextInputFocusEventData,
     View,
+    ViewStyle,
 } from 'react-native';
 
 interface SingleLineInputProps {
     inputRef?: React.LegacyRef<TextInput>;
+    style?: StyleProp<ViewStyle>;
     placeholder?: string;
     value?: string;
     isError?: boolean;
@@ -21,6 +24,7 @@ interface SingleLineInputProps {
 
 const SingleLineInput = ({
     inputRef,
+    style,
     placeholder,
     value,
     isError,
@@ -69,7 +73,7 @@ const SingleLineInput = ({
     };
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, style]}>
             <TextInput
                 ref={inputRef}
                 autoCorrect={false}
@@ -94,8 +98,6 @@ const SingleLineInput = ({
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        marginLeft: 8,
-        marginRight: 24,
     },
     option: {
         flex: 1,

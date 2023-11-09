@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
 import { useRecoilValue } from 'recoil';
 
-import { PreviewTitleBox } from 'components';
+import { PreviewQuestionBox, PreviewTitleBox } from 'components';
 import { formState, IQuestion } from 'states';
 
 const PreviewFormScreen = () => {
@@ -13,7 +13,7 @@ const PreviewFormScreen = () => {
     }, []);
 
     const renderItem = ({ item }: { item: IQuestion }) => {
-        return <></>;
+        return <PreviewQuestionBox item={item} />;
     };
 
     return (
