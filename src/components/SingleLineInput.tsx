@@ -1,14 +1,24 @@
 import { useRef } from 'react';
-import { Animated, Easing, StyleSheet, TextInput, View } from 'react-native';
+import {
+    Animated,
+    Easing,
+    NativeSyntheticEvent,
+    StyleSheet,
+    TextInput,
+    TextInputFocusEventData,
+    View,
+} from 'react-native';
 
 interface SingleLineInputProps {
     inputRef?: React.LegacyRef<TextInput>;
     placeholder?: string;
     value?: string;
+    isError?: boolean;
     onChangeText?: (text: string) => void;
+    onBlur?: (e: NativeSyntheticEvent<TextInputFocusEventData>) => void;
 }
 
-const SingleLineInput = ({ inputRef, placeholder, value, onChangeText }: SingleLineInputProps) => {
+const SingleLineInput = ({ inputRef, placeholder, value, isError, onChangeText, onBlur }: SingleLineInputProps) => {
     const scaleXAnimation = useRef(new Animated.Value(0)).current;
     const opacityAnimation = useRef(new Animated.Value(1)).current;
 
@@ -35,6 +45,13 @@ const SingleLineInput = ({ inputRef, placeholder, value, onChangeText }: SingleL
         });
     };
 
+    const handleBlur = (event: NativeSyntheticEvent<TextInputFocusEventData>) => {
+        blurAnimation();
+        if (typeof onBlur === 'function') {
+            onBlur(event);
+        }
+    };
+
     return (
         <View style={styles.container}>
             <TextInput
@@ -48,12 +65,13 @@ const SingleLineInput = ({ inputRef, placeholder, value, onChangeText }: SingleL
                 onFocus={() => {
                     focusAnimation();
                 }}
-                onBlur={() => {
-                    blurAnimation();
-                }}
+                onBlur={handleBlur}
             />
             <Animated.View
-                style={[styles.focusedBottom, { opacity: opacityAnimation, transform: [{ scaleX: scaleXAnimation }] }]}
+                style={[
+                    isError ? styles.errorBottom : styles.focusedBottom,
+                    { opacity: opacityAnimation, transform: [{ scaleX: scaleXAnimation }] },
+                ]}
             />
         </View>
     );
@@ -81,6 +99,13 @@ const styles = StyleSheet.create({
         height: 2,
         width: '100%',
         backgroundColor: '#673AB7',
+    },
+    errorBottom: {
+        position: 'absolute',
+        bottom: -1,
+        height: 2,
+        width: '100%',
+        backgroundColor: '#D93025',
     },
 });
 

@@ -27,6 +27,9 @@ const MultipleChoiceItem = ({ item, questionID, questionType }: MultipleChoiceIt
     const optionCount = optionList.filter(option => option.type === CHOICE_ITEM_TYPE.Label).length;
     const hasClose = item.type === CHOICE_ITEM_TYPE.ETC || (item.type === CHOICE_ITEM_TYPE.Label && optionCount > 1);
     const isQuestionSelected = questionID === form.selectedID;
+    const firstDuplicateIndex = optionList.findIndex(option => option.label === item.label);
+    const hasDuplicate = optionList.some(option => option.id !== item.id && option.label === item.label);
+    const isError = optionIndex !== firstDuplicateIndex && hasDuplicate;
 
     const updateLabelOption = useCallback(
         (label: string) => {
@@ -126,6 +129,12 @@ const MultipleChoiceItem = ({ item, questionID, questionType }: MultipleChoiceIt
         }
     };
 
+    const autoEditLabel = () => {
+        if (hasDuplicate) {
+            updateLabelOption('옵션 ' + (optionIndex + 1).toString());
+        }
+    };
+
     useEffect(() => {
         const timer = setTimeout(() => {
             if (item.label === '') {
@@ -146,7 +155,13 @@ const MultipleChoiceItem = ({ item, questionID, questionType }: MultipleChoiceIt
                 )}
             </Pressable>
             {item.type === CHOICE_ITEM_TYPE.Label && isQuestionSelected && (
-                <SingleLineInput inputRef={labelInputRef} value={item.label} onChangeText={updateLabelOption} />
+                <SingleLineInput
+                    inputRef={labelInputRef}
+                    value={item.label}
+                    isError={isError}
+                    onChangeText={updateLabelOption}
+                    onBlur={autoEditLabel}
+                />
             )}
             {item.type === CHOICE_ITEM_TYPE.Label && !isQuestionSelected && (
                 <Text style={styles.labelText}>{item.label}</Text>
@@ -167,6 +182,7 @@ const MultipleChoiceItem = ({ item, questionID, questionType }: MultipleChoiceIt
                     )}
                 </View>
             )}
+            {isError && <Icon style={styles.errorIcon} name="alert" color="#D93025" size={24} />}
             {isQuestionSelected && hasClose && (
                 <Pressable onPress={deleteOption}>
                     <Icon name="close" color="#5F6368" size={24} />
@@ -228,6 +244,9 @@ const styles = StyleSheet.create({
         color: '#202124',
         alignSelf: 'center',
         flex: 1,
+    },
+    errorIcon: {
+        marginRight: 8,
     },
 });
 
