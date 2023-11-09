@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import Icon from '@expo/vector-icons/MaterialCommunityIcons';
+import { useFocusEffect } from '@react-navigation/native';
 import uuid from 'react-native-uuid';
 import { useRecoilState } from 'recoil';
 
@@ -137,6 +138,12 @@ const MultipleChoiceItem = ({ item, questionID, questionType }: MultipleChoiceIt
         }
     };
 
+    const onFocus = () => {
+        setForm(prevForm => {
+            return { ...prevForm, focusInputID: item.id };
+        });
+    };
+
     useEffect(() => {
         const timer = setTimeout(() => {
             if (item.label === '') {
@@ -163,6 +170,12 @@ const MultipleChoiceItem = ({ item, questionID, questionType }: MultipleChoiceIt
         }
     }, [form.focusInputID, item.id, setForm]);
 
+    useFocusEffect(() => {
+        if (item.id === form.focusInputID) {
+            labelInputRef.current?.focus();
+        }
+    });
+
     return (
         <View style={styles.container}>
             {!(!isQuestionSelected && item.type === CHOICE_ITEM_TYPE.Add) && (
@@ -180,6 +193,7 @@ const MultipleChoiceItem = ({ item, questionID, questionType }: MultipleChoiceIt
                     value={item.label}
                     isError={isError}
                     onChangeText={updateLabelOption}
+                    onFocus={onFocus}
                     onBlur={autoEditLabel}
                 />
             )}

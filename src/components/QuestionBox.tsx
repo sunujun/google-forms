@@ -10,6 +10,7 @@ import {
     View,
 } from 'react-native';
 import Icon from '@expo/vector-icons/MaterialCommunityIcons';
+import { useFocusEffect } from '@react-navigation/native';
 import uuid from 'react-native-uuid';
 import { useRecoilState } from 'recoil';
 
@@ -51,6 +52,7 @@ const QuestionBox = ({ item, onLongPress }: QuestionBoxProps) => {
                 questionList: previousState.questionList.map(questionItem =>
                     questionItem.id === item.id ? { ...questionItem, isRequired } : questionItem,
                 ),
+                focusInputID: undefined,
             };
         });
     };
@@ -59,7 +61,7 @@ const QuestionBox = ({ item, onLongPress }: QuestionBoxProps) => {
         const willSelectID = currentIndex === 0 ? form.id : questionList[currentIndex - 1].id;
         const updatedQuestionList = questionList.filter(questionItem => questionItem.id !== item.id);
 
-        setForm({ ...form, questionList: updatedQuestionList, selectedID: willSelectID });
+        setForm({ ...form, questionList: updatedQuestionList, selectedID: willSelectID, focusInputID: undefined });
     };
 
     const copyQuestion = () => {
@@ -72,6 +74,12 @@ const QuestionBox = ({ item, onLongPress }: QuestionBoxProps) => {
         ];
 
         setForm({ ...form, questionList: updatedQuestionList, selectedID: newID });
+    };
+
+    const onFocus = () => {
+        setForm(prevForm => {
+            return { ...prevForm, focusInputID: item.id };
+        });
     };
 
     useEffect(() => {
@@ -89,6 +97,12 @@ const QuestionBox = ({ item, onLongPress }: QuestionBoxProps) => {
             questionInputRef.current?.blur();
         }
     }, [form.focusInputID, item.id, setForm]);
+
+    useFocusEffect(() => {
+        if (item.id === form.focusInputID) {
+            questionInputRef.current?.focus();
+        }
+    });
 
     return (
         <Pressable
@@ -111,6 +125,7 @@ const QuestionBox = ({ item, onLongPress }: QuestionBoxProps) => {
                         placeholder="질문"
                         value={item.question}
                         onChangeText={updateQuestion}
+                        onFocus={onFocus}
                     />
                 ) : (
                     <View style={styles.questionTextContainer}>

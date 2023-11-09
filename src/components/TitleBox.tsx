@@ -1,5 +1,6 @@
-import { useCallback, useEffect } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useEffect, useRef } from 'react';
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { useRecoilState } from 'recoil';
 
 import { INPUT_TYPE } from 'constant';
@@ -9,6 +10,8 @@ import MultiLineInput from './MultiLineInput';
 
 const TitleBox = () => {
     const [form, setForm] = useRecoilState(formState);
+    const titleInputRef = useRef<TextInput>(null);
+    const descriptionInputRef = useRef<TextInput>(null);
 
     const isSelected = form.selectedID === 'FORM-1';
 
@@ -42,6 +45,18 @@ const TitleBox = () => {
         });
     };
 
+    const onFocusTitleInput = () => {
+        setForm(prevForm => {
+            return { ...prevForm, focusInputID: 'TITLE-' + prevForm.id };
+        });
+    };
+
+    const onFocusDescriptionInput = () => {
+        setForm(prevForm => {
+            return { ...prevForm, focusInputID: 'DESCRIPTION-' + prevForm.id };
+        });
+    };
+
     useEffect(() => {
         const timer = setTimeout(() => {
             if (form.title === '') {
@@ -52,6 +67,17 @@ const TitleBox = () => {
         return () => clearTimeout(timer);
     }, [form.title, updateTitle]);
 
+    useFocusEffect(() => {
+        if ('TITLE-' + form.id === form.focusInputID) {
+            titleInputRef.current?.focus();
+        } else if ('DESCRIPTION-' + form.id === form.focusInputID) {
+            descriptionInputRef.current?.focus();
+        } else {
+            titleInputRef.current?.blur();
+            descriptionInputRef.current?.blur();
+        }
+    });
+
     return (
         <Pressable style={styles.container} onPress={onPressTitleBox}>
             {isSelected && <View style={styles.selectedMark} />}
@@ -59,20 +85,24 @@ const TitleBox = () => {
             <View style={styles.padding}>
                 {isSelected ? (
                     <MultiLineInput
+                        inputRef={titleInputRef}
                         type={INPUT_TYPE.Title}
                         placeholder="설문지 제목"
                         value={form.title}
                         onChangeText={updateTitle}
+                        onFocus={onFocusTitleInput}
                     />
                 ) : (
                     <Text style={styles.title}>{form.title}</Text>
                 )}
                 {isSelected ? (
                     <MultiLineInput
+                        inputRef={descriptionInputRef}
                         type={INPUT_TYPE.Description}
                         placeholder="설문지 설명"
                         value={form.description}
                         onChangeText={updateDescription}
+                        onFocus={onFocusDescriptionInput}
                     />
                 ) : (
                     <Text style={styles.description}>{form.description}</Text>
