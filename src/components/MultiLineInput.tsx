@@ -1,16 +1,27 @@
 import { useRef } from 'react';
-import { Animated, Easing, StyleSheet, TextInput, View } from 'react-native';
+import {
+    Animated,
+    Easing,
+    NativeSyntheticEvent,
+    StyleSheet,
+    TextInput,
+    TextInputFocusEventData,
+    View,
+} from 'react-native';
 
 import { INPUT_TYPE, InputID } from 'constant';
 
 interface MultiLineInputProps {
+    inputRef?: React.LegacyRef<TextInput>;
     type: InputID;
     placeholder?: string;
     value?: string;
     onChangeText?: (text: string) => void;
+    onFocus?: (e: NativeSyntheticEvent<TextInputFocusEventData>) => void;
+    onBlur?: (e: NativeSyntheticEvent<TextInputFocusEventData>) => void;
 }
 
-const MultiLineInput = ({ type, placeholder, value, onChangeText }: MultiLineInputProps) => {
+const MultiLineInput = ({ inputRef, type, placeholder, value, onChangeText, onFocus, onBlur }: MultiLineInputProps) => {
     const scaleXAnimation = useRef(new Animated.Value(0)).current;
     const opacityAnimation = useRef(new Animated.Value(1)).current;
 
@@ -37,9 +48,24 @@ const MultiLineInput = ({ type, placeholder, value, onChangeText }: MultiLineInp
         });
     };
 
+    const handleFocus = (event: NativeSyntheticEvent<TextInputFocusEventData>) => {
+        focusAnimation();
+        if (typeof onFocus === 'function') {
+            onFocus(event);
+        }
+    };
+
+    const handleBlur = (event: NativeSyntheticEvent<TextInputFocusEventData>) => {
+        blurAnimation();
+        if (typeof onBlur === 'function') {
+            onBlur(event);
+        }
+    };
+
     return (
         <View style={styles.container}>
             <TextInput
+                ref={inputRef}
                 autoCorrect={false}
                 value={value}
                 onChangeText={onChangeText}
@@ -53,12 +79,8 @@ const MultiLineInput = ({ type, placeholder, value, onChangeText }: MultiLineInp
                         ? styles.description
                         : styles.question
                 }
-                onFocus={() => {
-                    focusAnimation();
-                }}
-                onBlur={() => {
-                    blurAnimation();
-                }}
+                onFocus={handleFocus}
+                onBlur={handleBlur}
             />
             <Animated.View
                 style={[styles.focusedBottom, { opacity: opacityAnimation, transform: [{ scaleX: scaleXAnimation }] }]}

@@ -1,4 +1,14 @@
-import { GestureResponderEvent, Pressable, StyleSheet, Switch, Text, useWindowDimensions, View } from 'react-native';
+import { useEffect, useRef } from 'react';
+import {
+    GestureResponderEvent,
+    Pressable,
+    StyleSheet,
+    Switch,
+    Text,
+    TextInput,
+    useWindowDimensions,
+    View,
+} from 'react-native';
 import Icon from '@expo/vector-icons/MaterialCommunityIcons';
 import uuid from 'react-native-uuid';
 import { useRecoilState } from 'recoil';
@@ -17,6 +27,7 @@ interface QuestionBoxProps {
 const QuestionBox = ({ item, onLongPress }: QuestionBoxProps) => {
     const { width } = useWindowDimensions();
     const [form, setForm] = useRecoilState(formState);
+    const questionInputRef = useRef<TextInput>(null);
 
     const isSelected = form.selectedID === item.id;
     const questionList = form.questionList;
@@ -63,6 +74,22 @@ const QuestionBox = ({ item, onLongPress }: QuestionBoxProps) => {
         setForm({ ...form, questionList: updatedQuestionList, selectedID: newID });
     };
 
+    useEffect(() => {
+        if (isSelected) {
+            setForm(prevForm => {
+                return { ...prevForm, focusInputID: item.id };
+            });
+        }
+    }, [isSelected, item.id, setForm]);
+
+    useEffect(() => {
+        if (item.id === form.focusInputID) {
+            questionInputRef.current?.focus();
+        } else {
+            questionInputRef.current?.blur();
+        }
+    }, [form.focusInputID, item.id, setForm]);
+
     return (
         <Pressable
             style={styles.container}
@@ -79,6 +106,7 @@ const QuestionBox = ({ item, onLongPress }: QuestionBoxProps) => {
             <View style={styles.padding}>
                 {isSelected ? (
                     <MultiLineInput
+                        inputRef={questionInputRef}
                         type={INPUT_TYPE.Question}
                         placeholder="질문"
                         value={item.question}

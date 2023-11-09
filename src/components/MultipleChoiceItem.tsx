@@ -93,7 +93,7 @@ const MultipleChoiceItem = ({ item, questionID, questionType }: MultipleChoiceIt
                 optionList: updatedOptionList,
             };
 
-            const updatedForm = { ...prevForm, questionList: updatedQuestionList };
+            const updatedForm = { ...prevForm, questionList: updatedQuestionList, focusInputID: undefined };
 
             return updatedForm;
         });
@@ -101,6 +101,8 @@ const MultipleChoiceItem = ({ item, questionID, questionType }: MultipleChoiceIt
 
     const deleteOption = () => {
         setForm(prevForm => {
+            const willFocusID = optionIndex === 0 ? optionList[0].id : optionList[optionIndex - 1].id;
+
             const updatedOptionList = [...prevForm.questionList[questionIndex].optionList].filter(
                 option => option.id !== item.id,
             );
@@ -115,7 +117,7 @@ const MultipleChoiceItem = ({ item, questionID, questionType }: MultipleChoiceIt
                 optionList: updatedOptionList,
             };
 
-            const updatedForm = { ...prevForm, questionList: updatedQuestionList };
+            const updatedForm = { ...prevForm, questionList: updatedQuestionList, focusInputID: willFocusID };
 
             return updatedForm;
         });
@@ -144,6 +146,22 @@ const MultipleChoiceItem = ({ item, questionID, questionType }: MultipleChoiceIt
 
         return () => clearTimeout(timer);
     }, [item.label, optionIndex, updateLabelOption]);
+
+    useEffect(() => {
+        if (item.label !== '옵션 1') {
+            setForm(prevForm => {
+                return { ...prevForm, focusInputID: item.id };
+            });
+        }
+    }, [item.id, item.label, setForm]);
+
+    useEffect(() => {
+        if (item.id === form.focusInputID) {
+            labelInputRef.current?.focus();
+        } else {
+            labelInputRef.current?.blur();
+        }
+    }, [form.focusInputID, item.id, setForm]);
 
     return (
         <View style={styles.container}>

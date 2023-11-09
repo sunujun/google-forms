@@ -15,10 +15,19 @@ interface SingleLineInputProps {
     value?: string;
     isError?: boolean;
     onChangeText?: (text: string) => void;
+    onFocus?: (e: NativeSyntheticEvent<TextInputFocusEventData>) => void;
     onBlur?: (e: NativeSyntheticEvent<TextInputFocusEventData>) => void;
 }
 
-const SingleLineInput = ({ inputRef, placeholder, value, isError, onChangeText, onBlur }: SingleLineInputProps) => {
+const SingleLineInput = ({
+    inputRef,
+    placeholder,
+    value,
+    isError,
+    onChangeText,
+    onFocus,
+    onBlur,
+}: SingleLineInputProps) => {
     const scaleXAnimation = useRef(new Animated.Value(0)).current;
     const opacityAnimation = useRef(new Animated.Value(1)).current;
 
@@ -45,6 +54,13 @@ const SingleLineInput = ({ inputRef, placeholder, value, isError, onChangeText, 
         });
     };
 
+    const handleFocus = (event: NativeSyntheticEvent<TextInputFocusEventData>) => {
+        focusAnimation();
+        if (typeof onFocus === 'function') {
+            onFocus(event);
+        }
+    };
+
     const handleBlur = (event: NativeSyntheticEvent<TextInputFocusEventData>) => {
         blurAnimation();
         if (typeof onBlur === 'function') {
@@ -62,9 +78,7 @@ const SingleLineInput = ({ inputRef, placeholder, value, isError, onChangeText, 
                 placeholder={placeholder}
                 placeholderTextColor="#DADCE0"
                 style={styles.option}
-                onFocus={() => {
-                    focusAnimation();
-                }}
+                onFocus={handleFocus}
                 onBlur={handleBlur}
             />
             <Animated.View

@@ -8,6 +8,7 @@ export interface IForm {
     description: string;
     questionList: IQuestion[];
     selectedID: string;
+    focusInputID?: string;
 }
 
 export interface IQuestion {
@@ -32,5 +33,6 @@ export const formState = atom<IForm>({
         description: '',
         questionList: [],
         selectedID: 'FORM-1',
+        focusInputID: undefined,
     },
 });
