@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Icon from '@expo/vector-icons/MaterialCommunityIcons';
 import { useFocusEffect } from '@react-navigation/native';
 import uuid from 'react-native-uuid';
@@ -203,22 +203,29 @@ const MultipleChoiceItem = ({ item, questionID, questionType }: MultipleChoiceIt
             {item.type === CHOICE_ITEM_TYPE.ETC && <Text style={styles.etcOptionText}>{item.label}</Text>}
             {isQuestionSelected && item.type === CHOICE_ITEM_TYPE.Add && (
                 <View style={styles.addButton}>
-                    <Pressable onPress={addOption}>
+                    <TouchableOpacity onPress={addOption}>
                         <Text style={styles.addOptionText}>옵션 추가</Text>
-                    </Pressable>
+                    </TouchableOpacity>
                     {!hasETCOption && (
                         <>
                             <Text style={styles.orText}>또는 </Text>
-                            <Pressable onPress={addETCOption}>
+                            <TouchableOpacity onPress={addETCOption}>
                                 <Text style={styles.etcText}>&apos;기타&apos; 추가</Text>
-                            </Pressable>
+                            </TouchableOpacity>
                         </>
                     )}
                 </View>
             )}
             {isError && <Icon style={styles.errorIcon} name="alert" color="#D93025" size={24} />}
             {isQuestionSelected && hasClose && (
-                <Pressable onPress={deleteOption}>
+                <Pressable
+                    style={({ pressed }) => [
+                        {
+                            backgroundColor: pressed ? '#E1E1E1' : 'transparent',
+                        },
+                        styles.utilsButton,
+                    ]}
+                    onPress={deleteOption}>
                     <Icon name="close" color="#5F6368" size={24} />
                 </Pressable>
             )}
@@ -281,6 +288,11 @@ const styles = StyleSheet.create({
     },
     errorIcon: {
         marginRight: 8,
+    },
+    utilsButton: {
+        borderRadius: 20,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
 });
 
