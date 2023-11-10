@@ -10,7 +10,6 @@ import {
     View,
 } from 'react-native';
 import Icon from '@expo/vector-icons/MaterialCommunityIcons';
-import { useFocusEffect } from '@react-navigation/native';
 import uuid from 'react-native-uuid';
 import { useRecoilState } from 'recoil';
 
@@ -97,12 +96,6 @@ const QuestionBox = ({ item, onLongPress }: QuestionBoxProps) => {
             questionInputRef.current?.blur();
         }
     }, [form.focusInputID, item.id, setForm]);
-
-    useFocusEffect(() => {
-        if (item.id === form.focusInputID) {
-            questionInputRef.current?.focus();
-        }
-    });
 
     return (
         <Pressable

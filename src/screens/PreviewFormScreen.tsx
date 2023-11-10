@@ -1,5 +1,6 @@
 import { useCallback, useEffect } from 'react';
-import { FlatList, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { KeyboardAwareFlatList } from 'react-native-keyboard-aware-scroll-view';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRecoilState } from 'recoil';
 
@@ -36,13 +37,16 @@ const PreviewFormScreen = () => {
 
     return (
         <View style={styles.container}>
-            <FlatList
+            <KeyboardAwareFlatList
                 contentContainerStyle={{ paddingBottom: safeAreaInset.bottom }}
                 data={form.questionList}
                 showsVerticalScrollIndicator={false}
                 keyExtractor={item => item.id}
                 renderItem={renderItem}
                 ListHeaderComponent={ListHeaderComponent}
+                enableOnAndroid={true}
+                enableAutomaticScroll={true}
+                extraHeight={200}
             />
         </View>
     );
@@ -53,9 +57,6 @@ const styles = StyleSheet.create({
         backgroundColor: '#F0EBF8',
         flex: 1,
         paddingHorizontal: 12,
-    },
-    flatListContainer: {
-        flex: 1,
     },
 });
 

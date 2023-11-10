@@ -1,13 +1,15 @@
-import { useCallback } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Keyboard, Platform, StyleSheet, View } from 'react-native';
 import { useActionSheet } from '@expo/react-native-action-sheet';
 import Icon from '@expo/vector-icons/MaterialCommunityIcons';
-import DraggableFlatList, { OpacityDecorator, RenderItemParams } from 'react-native-draggable-flatlist';
+import { OpacityDecorator, RenderItemParams } from 'react-native-draggable-flatlist';
+import { KeyboardAwareFlatList } from 'react-native-keyboard-aware-scroll-view';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import uuid from 'react-native-uuid';
 import { useRecoilState } from 'recoil';
 
 import { Button, QuestionBox, TitleBox } from 'components';
+import KeyboardAwareDraggableFlatList from 'components/KeyboardAwareDraggableFlatList';
 import { ANSWER_TYPE, AnswerID, CHOICE_ITEM_TYPE } from 'constant';
 import { formState, IQuestion } from 'states';
 
@@ -15,6 +17,9 @@ const MakeFormScreen = () => {
     const safeAreaInset = useSafeAreaInsets();
     const { showActionSheetWithOptions } = useActionSheet();
     const [form, setForm] = useRecoilState(formState);
+
+    const scrollOffsetY = useRef(0);
+    const [resetOffsetY, setResetOffsetY] = useState<number | null>(null);
 
     const addQuestion = (type: AnswerID) => {
         const newID = 'QUESTION-' + uuid.v4();
@@ -91,17 +96,64 @@ const MakeFormScreen = () => {
         setForm({ ...form, questionList: data });
     };
 
+    useEffect(() => {
+        const updateOffset = () => {
+            if (resetOffsetY === null) {
+                setResetOffsetY(scrollOffsetY.current);
+            }
+        };
+
+        const resetOffset = () => {
+            if (resetOffsetY !== null) {
+                flatListRef.current?.scrollToPosition(0, resetOffsetY, true);
+                setResetOffsetY(null);
+            } else {
+                flatListRef.current?.scrollToPosition(0, 0, true);
+            }
+        };
+        if (Platform.OS === 'ios') {
+            const showSubscription = Keyboard.addListener('keyboardWillShow', () => {
+                updateOffset();
+            });
+            const hideSubscription = Keyboard.addListener('keyboardWillHide', () => {
+                resetOffset();
+            });
+
+            return () => {
+                showSubscription.remove();
+                hideSubscription.remove();
+            };
+        } else if (Platform.OS === 'android') {
+            const showSubscription = Keyboard.addListener('keyboardDidShow', () => {
+                updateOffset();
+            });
+            const hideSubscription = Keyboard.addListener('keyboardDidHide', () => {
+                resetOffset();
+            });
+
+            return () => {
+                showSubscription.remove();
+                hideSubscription.remove();
+            };
+        }
+    }, [resetOffsetY]);
+
+    const flatListRef = useRef<KeyboardAwareFlatList>(null);
     return (
         <View style={styles.container}>
-            <DraggableFlatList
+            <KeyboardAwareDraggableFlatList
+                ref={flatListRef}
                 containerStyle={styles.flatListContainer}
                 contentContainerStyle={{ paddingBottom: safeAreaInset.bottom }}
                 data={form.questionList}
                 showsVerticalScrollIndicator={false}
-                keyExtractor={item => item.id}
+                keyExtractor={(item: IQuestion) => item.id}
                 renderItem={renderItem}
                 ListHeaderComponent={ListHeaderComponent}
                 onDragEnd={onDragEnd}
+                onScrollOffsetChange={(scrollOffset: number) => {
+                    scrollOffsetY.current = scrollOffset;
+                }}
             />
             <View style={[styles.floatingButtonContainer, { bottom: safeAreaInset.bottom + 24 }]}>
                 <Button onPress={onPressFloatingButton}>

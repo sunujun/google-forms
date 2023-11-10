@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
 import { useRecoilState } from 'recoil';
 
 import { INPUT_TYPE } from 'constant';
@@ -66,17 +65,6 @@ const TitleBox = () => {
 
         return () => clearTimeout(timer);
     }, [form.title, updateTitle]);
-
-    useFocusEffect(() => {
-        if ('TITLE-' + form.id === form.focusInputID) {
-            titleInputRef.current?.focus();
-        } else if ('DESCRIPTION-' + form.id === form.focusInputID) {
-            descriptionInputRef.current?.focus();
-        } else {
-            titleInputRef.current?.blur();
-            descriptionInputRef.current?.blur();
-        }
-    });
 
     return (
         <Pressable style={styles.container} onPress={onPressTitleBox}>

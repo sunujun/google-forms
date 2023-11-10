@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Icon from '@expo/vector-icons/MaterialCommunityIcons';
-import { useFocusEffect } from '@react-navigation/native';
 import uuid from 'react-native-uuid';
 import { useRecoilState } from 'recoil';
 
@@ -169,12 +168,6 @@ const MultipleChoiceItem = ({ item, questionID, questionType }: MultipleChoiceIt
             labelInputRef.current?.blur();
         }
     }, [form.focusInputID, item.id, setForm]);
-
-    useFocusEffect(() => {
-        if (item.id === form.focusInputID) {
-            labelInputRef.current?.focus();
-        }
-    });
 
     return (
         <View style={styles.container}>
