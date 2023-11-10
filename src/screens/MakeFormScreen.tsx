@@ -33,6 +33,10 @@ const MakeFormScreen = () => {
                               label: '옵션 1',
                           },
                       ],
+            writeAnswer: '',
+            choiceAnswer: '',
+            checkAnswer: [],
+            checkIsRequired: false,
         };
         const updatedQuestionList = [...form.questionList, newQuestion];
 

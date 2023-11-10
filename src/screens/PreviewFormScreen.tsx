@@ -1,13 +1,13 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useRecoilValue } from 'recoil';
+import { useRecoilState } from 'recoil';
 
 import { PreviewQuestionBox, PreviewTitleBox } from 'components';
 import { formState, IQuestion } from 'states';
 
 const PreviewFormScreen = () => {
-    const form = useRecoilValue(formState);
+    const [form, setForm] = useRecoilState(formState);
     const safeAreaInset = useSafeAreaInsets();
 
     const ListHeaderComponent = useCallback(() => {
@@ -17,6 +17,22 @@ const PreviewFormScreen = () => {
     const renderItem = ({ item }: { item: IQuestion }) => {
         return <PreviewQuestionBox item={item} />;
     };
+
+    useEffect(() => {
+        const initAnswer: Pick<IQuestion, 'writeAnswer' | 'choiceAnswer' | 'checkAnswer' | 'checkIsRequired'> = {
+            writeAnswer: '',
+            choiceAnswer: '',
+            checkAnswer: [],
+            checkIsRequired: false,
+        };
+
+        setForm(previousState => {
+            return {
+                ...previousState,
+                questionList: previousState.questionList.map(questionItem => ({ ...questionItem, ...initAnswer })),
+            };
+        });
+    }, [setForm]);
 
     return (
         <View style={styles.container}>

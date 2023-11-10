@@ -1,12 +1,13 @@
-import { useState } from 'react';
-import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { useCallback, useEffect } from 'react';
+import { StyleSheet, Text, TouchableHighlight, useWindowDimensions, View } from 'react-native';
 import Icon from '@expo/vector-icons/MaterialCommunityIcons';
-import { useRecoilState } from 'recoil';
+import { useSetRecoilState } from 'recoil';
 
-import { ANSWER_TYPE, INPUT_TYPE } from 'constant';
+import { ANSWER_TYPE, CHOICE_ITEM_TYPE, INPUT_TYPE } from 'constant';
 import { formState, IQuestion } from 'states';
 
 import MultiLineInput from './MultiLineInput';
+import PreviewMultipleChoiceItem from './PreviewMultipleChoiceItem';
 import SingleLineInput from './SingleLineInput';
 
 interface PreviewQuestionBoxProps {
@@ -15,12 +16,57 @@ interface PreviewQuestionBoxProps {
 
 const PreviewQuestionBox = ({ item }: PreviewQuestionBoxProps) => {
     const { width } = useWindowDimensions();
-    const [form, setForm] = useRecoilState(formState);
-    const [answer, setAnswer] = useState('');
-    const [checkIsRequired, setCheckIsRequired] = useState(false);
+    const setForm = useSetRecoilState(formState);
+
+    const etcID = item.optionList.find(option => option.type === CHOICE_ITEM_TYPE.ETC)?.id;
+    const isMultipleError = item.isRequired && item.choiceAnswer === etcID && item.writeAnswer === '';
+
+    const updateWriteAnswer = (answer: string) => {
+        setForm(previousState => {
+            return {
+                ...previousState,
+                questionList: previousState.questionList.map(questionItem =>
+                    questionItem.id === item.id
+                        ? { ...questionItem, writeAnswer: answer, checkIsRequired: false }
+                        : questionItem,
+                ),
+            };
+        });
+    };
+
+    const updateCheckIsRequired = useCallback(
+        (checkIsRequired: boolean) => {
+            setForm(previousState => {
+                return {
+                    ...previousState,
+                    questionList: previousState.questionList.map(questionItem =>
+                        questionItem.id === item.id ? { ...questionItem, checkIsRequired } : questionItem,
+                    ),
+                };
+            });
+        },
+        [item.id, setForm],
+    );
+
+    const removeChoiceAnswer = () => {
+        setForm(previousState => {
+            return {
+                ...previousState,
+                questionList: previousState.questionList.map(questionItem =>
+                    questionItem.id === item.id ? { ...questionItem, choiceAnswer: '' } : questionItem,
+                ),
+            };
+        });
+    };
+
+    useEffect(() => {
+        if (item.type === ANSWER_TYPE.Multiple) {
+            updateCheckIsRequired(isMultipleError);
+        }
+    }, [isMultipleError, item.type, updateCheckIsRequired]);
 
     return (
-        <View style={checkIsRequired ? styles.errorContainer : styles.container}>
+        <View style={item.checkIsRequired ? styles.errorContainer : styles.container}>
             <View style={styles.padding}>
                 <View style={styles.questionTextContainer}>
                     <Text style={[styles.questionText, { maxWidth: width - 24 - 48 - 24 }]}>{item.question}</Text>
@@ -30,15 +76,14 @@ const PreviewQuestionBox = ({ item }: PreviewQuestionBoxProps) => {
                     <View style={styles.shortInput}>
                         <SingleLineInput
                             placeholder="내 답변"
-                            value={answer}
-                            // TODO: error 상태에서 입력되면 error 해제
-                            onChangeText={setAnswer}
-                            isError={item.isRequired ? checkIsRequired : undefined}
+                            value={item.writeAnswer}
+                            onChangeText={updateWriteAnswer}
+                            isError={item.isRequired ? item.checkIsRequired : undefined}
                             onBlur={() => {
-                                if (item.isRequired && answer === '') {
-                                    setCheckIsRequired(true);
+                                if (item.isRequired && item.writeAnswer === '') {
+                                    updateCheckIsRequired(true);
                                 } else {
-                                    setCheckIsRequired(false);
+                                    updateCheckIsRequired(false);
                                 }
                             }}
                         />
@@ -47,21 +92,31 @@ const PreviewQuestionBox = ({ item }: PreviewQuestionBoxProps) => {
                 {item.type === ANSWER_TYPE.Long && (
                     <MultiLineInput
                         placeholder="내 답변"
-                        value={answer}
+                        value={item.writeAnswer}
                         type={INPUT_TYPE.Answer}
-                        // TODO: error 상태에서 입력되면 error 해제
-                        onChangeText={setAnswer}
-                        isError={item.isRequired ? checkIsRequired : undefined}
+                        onChangeText={updateWriteAnswer}
+                        isError={item.isRequired ? item.checkIsRequired : undefined}
                         onBlur={() => {
-                            if (item.isRequired && answer === '') {
-                                setCheckIsRequired(true);
+                            if (item.isRequired && item.writeAnswer === '') {
+                                updateCheckIsRequired(true);
                             } else {
-                                setCheckIsRequired(false);
+                                updateCheckIsRequired(false);
                             }
                         }}
                     />
                 )}
-                {checkIsRequired && (
+                {(item.type === ANSWER_TYPE.Multiple || item.type === ANSWER_TYPE.CheckBox) &&
+                    item.optionList?.map(option => {
+                        return <PreviewMultipleChoiceItem key={option.id} item={option} question={item} />;
+                    })}
+                {item.type === ANSWER_TYPE.Multiple && !item.isRequired && item.choiceAnswer !== '' && (
+                    <View style={styles.checkInitContainer}>
+                        <TouchableHighlight activeOpacity={0.6} underlayColor="#DDDDDD" onPress={removeChoiceAnswer}>
+                            <Text style={styles.checkInitText}>선택해제</Text>
+                        </TouchableHighlight>
+                    </View>
+                )}
+                {item.checkIsRequired && (
                     <View style={styles.requiredContainer}>
                         <Icon name="alert-circle-outline" color="#D93025" size={24} />
                         <Text style={styles.requiredText}>필수 질문입니다.</Text>
@@ -126,6 +181,18 @@ const styles = StyleSheet.create({
         fontWeight: '400',
         color: '#D93025',
         marginLeft: 8,
+    },
+    checkInitContainer: {
+        alignItems: 'flex-end',
+    },
+    checkInitText: {
+        fontSize: 14,
+        fontWeight: '500',
+        letterSpacing: 0.25,
+        lineHeight: 20,
+        color: '#5f6368',
+        marginVertical: 4,
+        marginHorizontal: 8,
     },
 });
 

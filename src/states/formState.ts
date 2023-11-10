@@ -16,7 +16,11 @@ export interface IQuestion {
     type: AnswerID;
     question: string;
     optionList: IOption[];
+    writeAnswer: string;
+    choiceAnswer: string;
+    checkAnswer: string[];
     isRequired: boolean;
+    checkIsRequired: boolean;
 }
 
 export interface IOption {
