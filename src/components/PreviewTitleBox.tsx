@@ -49,8 +49,7 @@ const styles = StyleSheet.create({
         letterSpacing: 0,
         fontWeight: '400',
         color: '#202124',
-        borderBottomWidth: 1,
-        borderBottomColor: '#DADCE0',
+        height: 40,
     },
     description: {
         fontSize: 11,
@@ -58,8 +57,6 @@ const styles = StyleSheet.create({
         lineHeight: 15,
         fontWeight: '400',
         color: '#202124',
-        borderBottomWidth: 1,
-        borderBottomColor: '#DADCE0',
         marginTop: 8,
     },
     cautionContainer: {

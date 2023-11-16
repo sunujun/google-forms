@@ -1,14 +1,15 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-import { useRecoilState } from 'recoil';
+import { useRecoilState, useSetRecoilState } from 'recoil';
 
 import { INPUT_TYPE } from 'constant';
-import { formState } from 'states';
+import { flatListState, formState } from 'states';
 
 import MultiLineInput from './MultiLineInput';
 
 const TitleBox = () => {
     const [form, setForm] = useRecoilState(formState);
+    const setFlatList = useSetRecoilState(flatListState);
     const titleInputRef = useRef<TextInput>(null);
     const descriptionInputRef = useRef<TextInput>(null);
 
@@ -48,12 +49,28 @@ const TitleBox = () => {
         setForm(prevForm => {
             return { ...prevForm, focusInputID: 'TITLE-' + prevForm.id };
         });
+        if (titleInputRef.current) {
+            titleInputRef.current.measureInWindow((_x, y, _width, height) => {
+                setFlatList({
+                    textInputPositionY: y,
+                    textInputHeight: height,
+                });
+            });
+        }
     };
 
     const onFocusDescriptionInput = () => {
         setForm(prevForm => {
             return { ...prevForm, focusInputID: 'DESCRIPTION-' + prevForm.id };
         });
+        if (descriptionInputRef.current) {
+            descriptionInputRef.current.measureInWindow((_x, y, _width, height) => {
+                setFlatList({
+                    textInputPositionY: y,
+                    textInputHeight: height,
+                });
+            });
+        }
     };
 
     useEffect(() => {

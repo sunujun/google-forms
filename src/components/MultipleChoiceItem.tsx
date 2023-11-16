@@ -2,10 +2,10 @@ import { useCallback, useEffect, useRef } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Icon from '@expo/vector-icons/MaterialCommunityIcons';
 import uuid from 'react-native-uuid';
-import { useRecoilState } from 'recoil';
+import { useRecoilState, useSetRecoilState } from 'recoil';
 
 import { ANSWER_TYPE, AnswerID, CHOICE_ITEM_TYPE } from 'constant';
-import { formState, IOption } from 'states';
+import { flatListState, formState, IOption } from 'states';
 
 import SingleLineInput from './SingleLineInput';
 
@@ -17,6 +17,7 @@ interface MultipleChoiceItemProps {
 
 const MultipleChoiceItem = ({ item, questionID, questionType }: MultipleChoiceItemProps) => {
     const [form, setForm] = useRecoilState(formState);
+    const setFlatList = useSetRecoilState(flatListState);
     const labelInputRef = useRef<TextInput>(null);
 
     const questionList = form.questionList;
@@ -141,6 +142,14 @@ const MultipleChoiceItem = ({ item, questionID, questionType }: MultipleChoiceIt
         setForm(prevForm => {
             return { ...prevForm, focusInputID: item.id };
         });
+        if (labelInputRef.current) {
+            labelInputRef.current.measureInWindow((_x, y, _width, height) => {
+                setFlatList({
+                    textInputPositionY: y,
+                    textInputHeight: height,
+                });
+            });
+        }
     };
 
     useEffect(() => {

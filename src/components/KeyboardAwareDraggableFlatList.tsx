@@ -1,9 +1,9 @@
+import { Platform } from 'react-native';
 import DraggableFlatList from 'react-native-draggable-flatlist';
 import listenToKeyboardEvents from 'react-native-keyboard-aware-scroll-view/lib/KeyboardAwareHOC';
 
 const config = {
-    enableOnAndroid: true,
-    enableAutomaticScroll: true,
+    enableAutomaticScroll: Platform.OS === 'ios',
     extraHeight: 200,
     enableResetScrollToCoords: false,
     contentContainerStyle: undefined,

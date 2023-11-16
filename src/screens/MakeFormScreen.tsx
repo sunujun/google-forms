@@ -6,19 +6,21 @@ import { OpacityDecorator, RenderItemParams } from 'react-native-draggable-flatl
 import { KeyboardAwareFlatList } from 'react-native-keyboard-aware-scroll-view';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import uuid from 'react-native-uuid';
-import { useRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 
 import { Button, QuestionBox, TitleBox } from 'components';
 import KeyboardAwareDraggableFlatList from 'components/KeyboardAwareDraggableFlatList';
 import { ANSWER_TYPE, AnswerID, CHOICE_ITEM_TYPE } from 'constant';
-import { formState, IQuestion } from 'states';
+import { flatListState, formState, IQuestion } from 'states';
 
 const MakeFormScreen = () => {
     const safeAreaInset = useSafeAreaInsets();
     const { showActionSheetWithOptions } = useActionSheet();
     const [form, setForm] = useRecoilState(formState);
+    const flatList = useRecoilValue(flatListState);
 
     const scrollOffsetY = useRef(0);
+
     const [resetOffsetY, setResetOffsetY] = useState<number | null>(null);
 
     const addQuestion = (type: AnswerID) => {
@@ -124,8 +126,20 @@ const MakeFormScreen = () => {
                 hideSubscription.remove();
             };
         } else if (Platform.OS === 'android') {
-            const showSubscription = Keyboard.addListener('keyboardDidShow', () => {
+            const showSubscription = Keyboard.addListener('keyboardDidShow', event => {
                 updateOffset();
+                const keyboardPosition = event.endCoordinates.screenY;
+                const textInputBottomPosition = flatList.textInputHeight + flatList.textInputPositionY;
+
+                if (textInputBottomPosition > keyboardPosition) {
+                    flatListRef.current?.scrollToPosition(0, scrollOffsetY.current + 200, true);
+                } else if (textInputBottomPosition > keyboardPosition - 200) {
+                    flatListRef.current?.scrollToPosition(
+                        0,
+                        scrollOffsetY.current + 200 - (keyboardPosition - textInputBottomPosition),
+                        true,
+                    );
+                }
             });
             const hideSubscription = Keyboard.addListener('keyboardDidHide', () => {
                 resetOffset();
@@ -136,7 +150,7 @@ const MakeFormScreen = () => {
                 hideSubscription.remove();
             };
         }
-    }, [resetOffsetY]);
+    }, [flatList.textInputHeight, flatList.textInputPositionY, resetOffsetY]);
 
     const flatListRef = useRef<KeyboardAwareFlatList>(null);
     return (
@@ -154,6 +168,7 @@ const MakeFormScreen = () => {
                 onScrollOffsetChange={(scrollOffset: number) => {
                     scrollOffsetY.current = scrollOffset;
                 }}
+                removeClippedSubviews={false}
             />
             <View style={[styles.floatingButtonContainer, { bottom: safeAreaInset.bottom + 24 }]}>
                 <Button onPress={onPressFloatingButton}>

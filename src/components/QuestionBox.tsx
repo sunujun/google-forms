@@ -11,10 +11,10 @@ import {
 } from 'react-native';
 import Icon from '@expo/vector-icons/MaterialCommunityIcons';
 import uuid from 'react-native-uuid';
-import { useRecoilState } from 'recoil';
+import { useRecoilState, useSetRecoilState } from 'recoil';
 
 import { ANSWER_TYPE, CHOICE_ITEM_TYPE, INPUT_TYPE } from 'constant';
-import { formState, IQuestion } from 'states';
+import { flatListState, formState, IQuestion } from 'states';
 
 import MultiLineInput from './MultiLineInput';
 import MultipleChoiceItem from './MultipleChoiceItem';
@@ -27,6 +27,7 @@ interface QuestionBoxProps {
 const QuestionBox = ({ item, onLongPress }: QuestionBoxProps) => {
     const { width } = useWindowDimensions();
     const [form, setForm] = useRecoilState(formState);
+    const setFlatList = useSetRecoilState(flatListState);
     const questionInputRef = useRef<TextInput>(null);
 
     const isSelected = form.selectedID === item.id;
@@ -79,6 +80,14 @@ const QuestionBox = ({ item, onLongPress }: QuestionBoxProps) => {
         setForm(prevForm => {
             return { ...prevForm, focusInputID: item.id };
         });
+        if (questionInputRef.current) {
+            questionInputRef.current.measureInWindow((_x, y, _width, height) => {
+                setFlatList({
+                    textInputPositionY: y,
+                    textInputHeight: height,
+                });
+            });
+        }
     };
 
     useEffect(() => {

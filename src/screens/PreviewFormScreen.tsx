@@ -47,6 +47,7 @@ const PreviewFormScreen = () => {
                 enableOnAndroid={true}
                 enableAutomaticScroll={true}
                 extraHeight={200}
+                removeClippedSubviews={false}
             />
         </View>
     );
