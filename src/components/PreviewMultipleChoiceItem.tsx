@@ -4,6 +4,7 @@ import Icon from '@expo/vector-icons/MaterialCommunityIcons';
 
 import { ANSWER_TYPE, CHOICE_ITEM_TYPE } from 'constant';
 import { useFormContext } from 'contexts/FormContext';
+import { useTheme } from 'contexts/ThemeContext';
 import { IOption, IQuestion } from 'types/form';
 
 import SingleLineInput from './SingleLineInput';
@@ -15,6 +16,7 @@ interface PreviewMultipleChoiceItemProps {
 
 const PreviewMultipleChoiceItem = ({ item, question }: PreviewMultipleChoiceItemProps) => {
     const { dispatch } = useFormContext();
+    const { colors } = useTheme();
     const etcInputRef = useRef<TextInput>(null);
 
     const updateWriteAnswer = (answer: string) => {
@@ -106,22 +108,24 @@ const PreviewMultipleChoiceItem = ({ item, question }: PreviewMultipleChoiceItem
             onPress={question.type === ANSWER_TYPE.Multiple ? onPressMultiple : onPressCheckBox}>
             <TouchableOpacity onPress={question.type === ANSWER_TYPE.Multiple ? onPressMultiple : onPressCheckBox}>
                 {question.type === ANSWER_TYPE.Multiple && question.choiceAnswer === item.id && (
-                    <Icon name="checkbox-blank-circle" color="#BDBDBD" size={24} />
+                    <Icon name="checkbox-blank-circle" color={colors.iconDisabled} size={24} />
                 )}
                 {question.type === ANSWER_TYPE.Multiple && question.choiceAnswer !== item.id && (
-                    <Icon name="checkbox-blank-circle-outline" color="#BDBDBD" size={24} />
+                    <Icon name="checkbox-blank-circle-outline" color={colors.iconDisabled} size={24} />
                 )}
                 {question.type === ANSWER_TYPE.CheckBox && question.checkAnswer.includes(item.id) && (
-                    <Icon name="checkbox-blank" color="#BDBDBD" size={24} />
+                    <Icon name="checkbox-blank" color={colors.iconDisabled} size={24} />
                 )}
                 {question.type === ANSWER_TYPE.CheckBox && !question.checkAnswer.includes(item.id) && (
-                    <Icon name="checkbox-blank-outline" color="#BDBDBD" size={24} />
+                    <Icon name="checkbox-blank-outline" color={colors.iconDisabled} size={24} />
                 )}
             </TouchableOpacity>
-            {item.type === CHOICE_ITEM_TYPE.Label && <Text style={styles.labelText}>{item.label}</Text>}
+            {item.type === CHOICE_ITEM_TYPE.Label && (
+                <Text style={[styles.labelText, { color: colors.textHint }]}>{item.label}</Text>
+            )}
             {item.type === CHOICE_ITEM_TYPE.ETC && (
                 <View style={styles.etcContainer}>
-                    <Text style={styles.labelText}>기타:</Text>
+                    <Text style={[styles.labelText, { color: colors.textHint }]}>기타:</Text>
                     <SingleLineInput
                         style={styles.etcInput}
                         inputRef={etcInputRef}
@@ -139,23 +143,12 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         marginBottom: 20,
     },
-    etcOptionText: {
-        marginLeft: 8,
-        fontSize: 14,
-        letterSpacing: 0.2,
-        fontWeight: '400',
-        lineHeight: 20,
-        color: '#70757A',
-        alignSelf: 'center',
-        flex: 1,
-    },
     labelText: {
         marginLeft: 8,
         fontSize: 14,
         letterSpacing: 0.2,
         lineHeight: 16,
         fontWeight: '400',
-        color: '#202124',
         alignSelf: 'center',
     },
     etcContainer: {

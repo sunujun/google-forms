@@ -10,6 +10,7 @@ import uuid from 'react-native-uuid';
 import { Button, QuestionBox, TitleBox } from 'components';
 import { ANSWER_TYPE, AnswerID, CHOICE_ITEM_TYPE } from 'constant';
 import { useFormContext } from 'contexts/FormContext';
+import { useTheme } from 'contexts/ThemeContext';
 import { IFlatList, IQuestion } from 'types/form';
 
 const MakeFormScreen = () => {
@@ -17,6 +18,7 @@ const MakeFormScreen = () => {
     const { showActionSheetWithOptions } = useActionSheet();
 
     const { formState, dispatch } = useFormContext();
+    const { colors } = useTheme();
 
     const scrollOffsetY = useRef(0);
 
@@ -49,7 +51,6 @@ const MakeFormScreen = () => {
             checkIsRequired: false,
         };
 
-        // Add new question and update selected ID
         const updatedQuestionList = [...formState.questionList, newQuestion];
         dispatch({
             type: 'UPDATE_FORM',
@@ -171,7 +172,7 @@ const MakeFormScreen = () => {
     const flatListRef = useRef<KeyboardAwareFlatList>(null);
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: colors.background }]}>
             <ReorderableList
                 data={formState.questionList}
                 style={styles.flatListContainer}
@@ -184,7 +185,11 @@ const MakeFormScreen = () => {
             />
             <View style={[styles.floatingButtonContainer, { bottom: safeAreaInset.bottom + 24 }]}>
                 <Button onPress={onPressFloatingButton}>
-                    <View style={styles.floatingButton}>
+                    <View
+                        style={[
+                            styles.floatingButton,
+                            { backgroundColor: colors.primary, shadowColor: colors.shadow },
+                        ]}>
                         <Icon name="plus" color="white" size={30} />
                     </View>
                 </Button>
@@ -195,7 +200,6 @@ const MakeFormScreen = () => {
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: '#F0EBF8',
         flex: 1,
         paddingHorizontal: 12,
     },
@@ -207,10 +211,8 @@ const styles = StyleSheet.create({
         width: 60,
         height: 60,
         borderRadius: 30,
-        backgroundColor: '#673AB7',
         alignItems: 'center',
         justifyContent: 'center',
-        shadowColor: '#000000',
         shadowOffset: {
             width: 5,
             height: 5,

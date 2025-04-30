@@ -6,6 +6,7 @@ import uuid from 'react-native-uuid';
 
 import { ANSWER_TYPE, CHOICE_ITEM_TYPE, INPUT_TYPE } from 'constant';
 import { useFormContext } from 'contexts/FormContext';
+import { useTheme } from 'contexts/ThemeContext';
 import { IQuestion } from 'types/form';
 
 import MultiLineInput from './MultiLineInput';
@@ -19,6 +20,7 @@ interface QuestionBoxProps {
 const QuestionBox = ({ item, updateFlatList }: QuestionBoxProps) => {
     const { width } = useWindowDimensions();
     const { formState, dispatch } = useFormContext();
+    const { colors } = useTheme();
 
     const questionInputRef = useRef<TextInput>(null);
 
@@ -107,12 +109,12 @@ const QuestionBox = ({ item, updateFlatList }: QuestionBoxProps) => {
 
     return (
         <Pressable
-            style={styles.container}
+            style={[styles.container, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}
             onPress={() => {
                 dispatch({ type: 'UPDATE_SELECTED_ID', payload: item.id });
             }}
             onLongPress={drag}>
-            {isSelected && <View style={styles.selectedMark} />}
+            {isSelected && <View style={[styles.selectedMark, { backgroundColor: colors.selectedMark }]} />}
             <View style={styles.padding}>
                 {isSelected ? (
                     <MultiLineInput
@@ -125,15 +127,19 @@ const QuestionBox = ({ item, updateFlatList }: QuestionBoxProps) => {
                     />
                 ) : (
                     <View style={styles.questionTextContainer}>
-                        <Text style={[styles.questionText, { maxWidth: width - 24 - 48 - 24 }]}>
+                        <Text
+                            style={[
+                                styles.questionText,
+                                { maxWidth: width - 24 - 48 - 24, color: colors.textPrimary },
+                            ]}>
                             {item.question === '' ? '질문' : item.question}
                         </Text>
-                        {item.isRequired && <Text style={styles.requiredMark}>*</Text>}
+                        {item.isRequired && <Text style={[styles.requiredMark, { color: colors.error }]}>*</Text>}
                     </View>
                 )}
                 {item.type === ANSWER_TYPE.Short && (
                     <>
-                        <Text style={styles.answerText}>단답형 텍스트</Text>
+                        <Text style={[styles.answerText, { color: colors.textHint }]}>단답형 텍스트</Text>
                         <View style={styles.shortDottedLine}>
                             <View style={styles.dottedLine} />
                         </View>
@@ -141,7 +147,7 @@ const QuestionBox = ({ item, updateFlatList }: QuestionBoxProps) => {
                 )}
                 {item.type === ANSWER_TYPE.Long && (
                     <>
-                        <Text style={styles.answerText}>장문형 텍스트</Text>
+                        <Text style={[styles.answerText, { color: colors.textHint }]}>장문형 텍스트</Text>
                         <View style={styles.longDottedLine}>
                             <View style={styles.dottedLine} />
                         </View>
@@ -168,7 +174,7 @@ const QuestionBox = ({ item, updateFlatList }: QuestionBoxProps) => {
                     />
                 )}
                 {isSelected && (
-                    <View style={styles.utilsContainer}>
+                    <View style={[styles.utilsContainer, { borderTopColor: colors.border }]}>
                         <Pressable
                             style={({ pressed }) => [
                                 {
@@ -179,7 +185,7 @@ const QuestionBox = ({ item, updateFlatList }: QuestionBoxProps) => {
                             onPress={() => {
                                 copyQuestion();
                             }}>
-                            <Icon name="content-copy" color="#5F6368" size={20} />
+                            <Icon name="content-copy" color={colors.iconPrimary} size={20} />
                         </Pressable>
                         <Pressable
                             style={({ pressed }) => [
@@ -191,14 +197,14 @@ const QuestionBox = ({ item, updateFlatList }: QuestionBoxProps) => {
                             onPress={() => {
                                 deleteQuestion();
                             }}>
-                            <Icon name="trash-can-outline" color="#5F6368" size={24} />
+                            <Icon name="trash-can-outline" color={colors.iconPrimary} size={24} />
                         </Pressable>
-                        <View style={styles.divider} />
-                        <Text style={styles.requireText}>필수</Text>
+                        <View style={[styles.divider, { backgroundColor: colors.divider }]} />
+                        <Text style={[styles.requireText, { color: colors.textPrimary }]}>필수</Text>
                         <Switch
-                            trackColor={{ false: '#B9B9B9', true: '#F0EBF8' }}
-                            thumbColor={item.isRequired ? '#673AB7' : '#FAFAFA'}
-                            ios_backgroundColor="#F0EBF8"
+                            trackColor={{ false: '#B9B9B9', true: colors.background }}
+                            thumbColor={item.isRequired ? colors.primary : '#FAFAFA'}
+                            ios_backgroundColor={colors.background}
                             onValueChange={updateIsRequired}
                             value={item.isRequired}
                         />
@@ -211,15 +217,12 @@ const QuestionBox = ({ item, updateFlatList }: QuestionBoxProps) => {
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: '#FFFFFF',
         marginVertical: 12,
         borderWidth: 1,
-        borderColor: '#DADCE0',
         borderRadius: 4,
         minHeight: 28,
     },
     selectedMark: {
-        backgroundColor: '#4285F4',
         borderTopLeftRadius: 4,
         borderBottomLeftRadius: 4,
         width: 8,
@@ -239,10 +242,8 @@ const styles = StyleSheet.create({
         letterSpacing: 0.2,
         lineHeight: 16,
         fontWeight: '400',
-        color: '#202124',
     },
     requiredMark: {
-        color: '#D93025',
         fontWeight: '400',
         fontSize: 16,
         paddingLeft: 4,
@@ -268,13 +269,11 @@ const styles = StyleSheet.create({
         fontWeight: '400',
         letterSpacing: 0.2,
         lineHeight: 20,
-        color: '#70757A',
     },
     utilsContainer: {
         flexDirection: 'row',
         justifyContent: 'flex-end',
         marginTop: 28,
-        borderTopColor: '#DADCE0',
         borderTopWidth: 1,
         alignItems: 'center',
         marginBottom: -24,
@@ -292,14 +291,12 @@ const styles = StyleSheet.create({
         width: 1,
         height: 24,
         marginHorizontal: 16,
-        backgroundColor: '#DADCE0',
     },
     requireText: {
         fontSize: 14,
         fontWeight: '400',
         letterSpacing: 0.2,
         lineHeight: 20,
-        color: '#202124',
         marginRight: 8,
     },
 });

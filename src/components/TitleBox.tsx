@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { INPUT_TYPE } from 'constant';
 import { useFormContext } from 'contexts/FormContext';
+import { useTheme } from 'contexts/ThemeContext';
 
 import MultiLineInput from './MultiLineInput';
 
@@ -12,6 +13,7 @@ interface TitleBoxProps {
 
 const TitleBox = ({ updateFlatList }: TitleBoxProps) => {
     const { formState, dispatch } = useFormContext();
+    const { colors } = useTheme();
 
     const titleInputRef = useRef<TextInput>(null);
     const descriptionInputRef = useRef<TextInput>(null);
@@ -66,9 +68,11 @@ const TitleBox = ({ updateFlatList }: TitleBoxProps) => {
     }, [formState.title, handleUpdateTitle]);
 
     return (
-        <Pressable style={styles.container} onPress={onPressTitleBox}>
-            {isSelected && <View style={styles.selectedMark} />}
-            <View style={styles.topMark} />
+        <Pressable
+            style={[styles.container, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}
+            onPress={onPressTitleBox}>
+            {isSelected && <View style={[styles.selectedMark, { backgroundColor: colors.accent }]} />}
+            <View style={[styles.topMark, { backgroundColor: colors.primary }]} />
             <View style={styles.padding}>
                 {isSelected ? (
                     <MultiLineInput
@@ -80,7 +84,9 @@ const TitleBox = ({ updateFlatList }: TitleBoxProps) => {
                         onFocus={onFocusTitleInput}
                     />
                 ) : (
-                    <Text style={styles.title}>{formState.title}</Text>
+                    <Text style={[styles.title, { borderBottomColor: colors.border, color: colors.textPrimary }]}>
+                        {formState.title}
+                    </Text>
                 )}
                 {isSelected ? (
                     <MultiLineInput
@@ -92,7 +98,9 @@ const TitleBox = ({ updateFlatList }: TitleBoxProps) => {
                         onFocus={onFocusDescriptionInput}
                     />
                 ) : (
-                    <Text style={styles.description}>{formState.description}</Text>
+                    <Text style={[styles.description, { borderBottomColor: colors.border, color: colors.textPrimary }]}>
+                        {formState.description}
+                    </Text>
                 )}
             </View>
         </Pressable>
@@ -101,15 +109,12 @@ const TitleBox = ({ updateFlatList }: TitleBoxProps) => {
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: '#FFFFFF',
         marginVertical: 12,
         borderWidth: 1,
-        borderColor: '#DADCE0',
         borderRadius: 4,
         minHeight: 28,
     },
     topMark: {
-        backgroundColor: '#673AB7',
         borderTopLeftRadius: 4,
         borderTopRightRadius: 4,
         height: 10,
@@ -117,7 +122,6 @@ const styles = StyleSheet.create({
         width: '100%',
     },
     selectedMark: {
-        backgroundColor: '#4285F4',
         borderTopLeftRadius: 4,
         borderBottomLeftRadius: 4,
         width: 8,
@@ -132,18 +136,14 @@ const styles = StyleSheet.create({
         fontSize: 24,
         letterSpacing: 0,
         fontWeight: '400',
-        color: '#202124',
         borderBottomWidth: 1,
-        borderBottomColor: '#DADCE0',
     },
     description: {
         fontSize: 11,
         letterSpacing: 0,
         lineHeight: 15,
         fontWeight: '400',
-        color: '#202124',
         borderBottomWidth: 1,
-        borderBottomColor: '#DADCE0',
         marginTop: 8,
     },
 });

@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 
 import { INPUT_TYPE, InputID } from 'constant';
+import { useTheme } from 'contexts/ThemeContext';
 
 interface MultiLineInputProps {
     inputRef?: React.LegacyRef<TextInput>;
@@ -34,6 +35,8 @@ const MultiLineInput = ({
 }: MultiLineInputProps) => {
     const scaleXAnimation = useRef(new Animated.Value(0)).current;
     const opacityAnimation = useRef(new Animated.Value(1)).current;
+
+    const { colors } = useTheme();
 
     const focusAnimation = () => {
         opacityAnimation.setValue(1);
@@ -80,25 +83,34 @@ const MultiLineInput = ({
                 value={value}
                 onChangeText={onChangeText}
                 placeholder={placeholder}
-                placeholderTextColor="#DADCE0"
+                placeholderTextColor={colors.textDisabled}
                 multiline={true}
                 style={
                     type === INPUT_TYPE.Title
-                        ? styles.title
+                        ? [styles.title, { color: colors.textPrimary, borderBottomColor: colors.border }]
                         : type === INPUT_TYPE.Description
-                        ? styles.description
-                        : type === INPUT_TYPE.Question
-                        ? styles.question
-                        : isError
-                        ? styles.errorAnswer
-                        : styles.answer
+                          ? [styles.description, { color: colors.textPrimary, borderBottomColor: colors.border }]
+                          : type === INPUT_TYPE.Question
+                            ? [
+                                  styles.question,
+                                  {
+                                      color: colors.textPrimary,
+                                      borderBottomColor: colors.border,
+                                      backgroundColor: colors.inputBackground,
+                                  },
+                              ]
+                            : isError
+                              ? [styles.errorAnswer, { color: colors.textPrimary, borderBottomColor: colors.error }]
+                              : [styles.answer, { color: colors.textPrimary, borderBottomColor: colors.border }]
                 }
                 onFocus={handleFocus}
                 onBlur={handleBlur}
             />
             <Animated.View
                 style={[
-                    isError ? styles.errorBottom : styles.focusedBottom,
+                    isError
+                        ? [styles.errorBottom, { backgroundColor: colors.error }]
+                        : [styles.focusedBottom, { backgroundColor: colors.inputFocused }],
                     { opacity: opacityAnimation, transform: [{ scaleX: scaleXAnimation }] },
                 ]}
             />
@@ -114,18 +126,14 @@ const styles = StyleSheet.create({
         fontSize: 24,
         letterSpacing: 0,
         fontWeight: '400',
-        color: '#202124',
         borderBottomWidth: 1,
-        borderBottomColor: '#DADCE0',
     },
     description: {
         fontSize: 11,
         letterSpacing: 0,
         lineHeight: 15,
         fontWeight: '400',
-        color: '#202124',
         borderBottomWidth: 1,
-        borderBottomColor: '#DADCE0',
         marginTop: 8,
     },
     question: {
@@ -133,42 +141,33 @@ const styles = StyleSheet.create({
         letterSpacing: 0.2,
         lineHeight: 16,
         fontWeight: '400',
-        color: '#202124',
         borderBottomWidth: 1,
-        borderBottomColor: '#DADCE0',
-        backgroundColor: '#F8F9FA',
     },
     answer: {
         fontSize: 14,
         letterSpacing: 0.2,
         lineHeight: 16,
         fontWeight: '400',
-        color: '#202124',
         borderBottomWidth: 1,
-        borderBottomColor: '#DADCE0',
     },
     errorAnswer: {
         fontSize: 14,
         letterSpacing: 0.2,
         lineHeight: 16,
         fontWeight: '400',
-        color: '#202124',
         borderBottomWidth: 1,
-        borderBottomColor: '#D93025',
     },
     focusedBottom: {
         position: 'absolute',
         bottom: -1,
         height: 2,
         width: '100%',
-        backgroundColor: '#673AB7',
     },
     errorBottom: {
         position: 'absolute',
         bottom: -1,
         height: 2,
         width: '100%',
-        backgroundColor: '#D93025',
     },
 });
 

@@ -11,6 +11,8 @@ import {
     ViewStyle,
 } from 'react-native';
 
+import { useTheme } from 'contexts/ThemeContext';
+
 interface SingleLineInputProps {
     inputRef?: React.LegacyRef<TextInput>;
     style?: StyleProp<ViewStyle>;
@@ -32,6 +34,7 @@ const SingleLineInput = ({
     onFocus,
     onBlur,
 }: SingleLineInputProps) => {
+    const { colors } = useTheme();
     const scaleXAnimation = useRef(new Animated.Value(0)).current;
     const opacityAnimation = useRef(new Animated.Value(1)).current;
 
@@ -80,14 +83,20 @@ const SingleLineInput = ({
                 value={value}
                 onChangeText={onChangeText}
                 placeholder={placeholder}
-                placeholderTextColor="#DADCE0"
-                style={isError ? styles.errorOption : styles.option}
+                placeholderTextColor={colors.textDisabled}
+                style={
+                    isError
+                        ? [styles.errorOption, { color: colors.textPrimary, borderBottomColor: colors.error }]
+                        : [styles.option, { color: colors.textPrimary, borderBottomColor: colors.border }]
+                }
                 onFocus={handleFocus}
                 onBlur={handleBlur}
             />
             <Animated.View
                 style={[
-                    isError ? styles.errorBottom : styles.focusedBottom,
+                    isError
+                        ? [styles.errorBottom, { backgroundColor: colors.error }]
+                        : [styles.focusedBottom, { backgroundColor: colors.primary }],
                     { opacity: opacityAnimation, transform: [{ scaleX: scaleXAnimation }] },
                 ]}
             />
@@ -105,10 +114,7 @@ const styles = StyleSheet.create({
         letterSpacing: 0.2,
         lineHeight: 16,
         fontWeight: '400',
-        color: '#202124',
         borderBottomWidth: 1,
-        borderBottomColor: '#DADCE0',
-        // backgroundColor: 'red',
     },
     errorOption: {
         flex: 1,
@@ -116,23 +122,19 @@ const styles = StyleSheet.create({
         letterSpacing: 0.2,
         lineHeight: 16,
         fontWeight: '400',
-        color: '#202124',
         borderBottomWidth: 1,
-        borderBottomColor: '#D93025',
     },
     focusedBottom: {
         position: 'absolute',
         bottom: -1,
         height: 2,
         width: '100%',
-        backgroundColor: '#673AB7',
     },
     errorBottom: {
         position: 'absolute',
         bottom: -1,
         height: 2,
         width: '100%',
-        backgroundColor: '#D93025',
     },
 });
 

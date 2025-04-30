@@ -5,6 +5,7 @@ import uuid from 'react-native-uuid';
 
 import { ANSWER_TYPE, AnswerID, CHOICE_ITEM_TYPE } from 'constant';
 import { useFormContext } from 'contexts/FormContext';
+import { useTheme } from 'contexts/ThemeContext';
 import { IOption } from 'types/form';
 
 import SingleLineInput from './SingleLineInput';
@@ -18,6 +19,7 @@ interface MultipleChoiceItemProps {
 
 const MultipleChoiceItem = ({ item, questionID, questionType, updateFlatList }: MultipleChoiceItemProps) => {
     const { formState, dispatch } = useFormContext();
+    const { colors } = useTheme();
     const labelInputRef = useRef<TextInput>(null);
 
     const questionList = formState.questionList;
@@ -170,9 +172,9 @@ const MultipleChoiceItem = ({ item, questionID, questionType, updateFlatList }: 
             {!(!isQuestionSelected && item.type === CHOICE_ITEM_TYPE.Add) && (
                 <Pressable onPress={onPressCheckBox}>
                     {questionType === ANSWER_TYPE.Multiple ? (
-                        <Icon name="checkbox-blank-circle-outline" color="#BDBDBD" size={24} />
+                        <Icon name="checkbox-blank-circle-outline" color={colors.iconDisabled} size={24} />
                     ) : (
-                        <Icon name="checkbox-blank-outline" color="#BDBDBD" size={24} />
+                        <Icon name="checkbox-blank-outline" color={colors.iconDisabled} size={24} />
                     )}
                 </Pressable>
             )}
@@ -188,25 +190,27 @@ const MultipleChoiceItem = ({ item, questionID, questionType, updateFlatList }: 
                 />
             )}
             {item.type === CHOICE_ITEM_TYPE.Label && !isQuestionSelected && (
-                <Text style={styles.labelText}>{item.label}</Text>
+                <Text style={[styles.labelText, { color: colors.textPrimary }]}>{item.label}</Text>
             )}
-            {item.type === CHOICE_ITEM_TYPE.ETC && <Text style={styles.etcOptionText}>{item.label}</Text>}
+            {item.type === CHOICE_ITEM_TYPE.ETC && (
+                <Text style={[styles.etcOptionText, { color: colors.textHint }]}>{item.label}</Text>
+            )}
             {isQuestionSelected && item.type === CHOICE_ITEM_TYPE.Add && (
                 <View style={styles.addButton}>
                     <TouchableOpacity onPress={addOption}>
-                        <Text style={styles.addOptionText}>옵션 추가</Text>
+                        <Text style={[styles.addOptionText, { color: colors.textHint }]}>옵션 추가</Text>
                     </TouchableOpacity>
                     {!hasETCOption && (
                         <>
-                            <Text style={styles.orText}>또는 </Text>
+                            <Text style={[styles.orText, { color: colors.textPrimary }]}>또는 </Text>
                             <TouchableOpacity onPress={addETCOption}>
-                                <Text style={styles.etcText}>&apos;기타&apos; 추가</Text>
+                                <Text style={[styles.etcText, { color: colors.etc }]}>&apos;기타&apos; 추가</Text>
                             </TouchableOpacity>
                         </>
                     )}
                 </View>
             )}
-            {isError && <Icon style={styles.errorIcon} name="alert" color="#D93025" size={24} />}
+            {isError && <Icon style={styles.errorIcon} name="alert" color={colors.error} size={24} />}
             {isQuestionSelected && hasClose && (
                 <Pressable
                     style={({ pressed }) => [
@@ -216,7 +220,7 @@ const MultipleChoiceItem = ({ item, questionID, questionType, updateFlatList }: 
                         styles.utilsButton,
                     ]}
                     onPress={deleteOption}>
-                    <Icon name="close" color="#5F6368" size={24} />
+                    <Icon name="close" color={colors.textSecondary} size={24} />
                 </Pressable>
             )}
         </View>
@@ -235,7 +239,6 @@ const styles = StyleSheet.create({
         letterSpacing: 0.2,
         fontWeight: '400',
         lineHeight: 20,
-        color: '#70757A',
         alignSelf: 'center',
         flex: 1,
     },
@@ -250,14 +253,12 @@ const styles = StyleSheet.create({
         letterSpacing: 0.2,
         fontWeight: '400',
         lineHeight: 20,
-        color: '#70757A',
     },
     orText: {
         fontSize: 14,
         letterSpacing: 0.2,
         fontWeight: '400',
         lineHeight: 20,
-        color: '#202124',
         marginLeft: 4,
     },
     etcText: {
@@ -265,7 +266,6 @@ const styles = StyleSheet.create({
         letterSpacing: 0.25,
         fontWeight: '400',
         lineHeight: 20,
-        color: '#1A73E8',
     },
     labelText: {
         marginLeft: 8,
@@ -273,7 +273,6 @@ const styles = StyleSheet.create({
         letterSpacing: 0.2,
         lineHeight: 16,
         fontWeight: '400',
-        color: '#202124',
         alignSelf: 'center',
         flex: 1,
     },

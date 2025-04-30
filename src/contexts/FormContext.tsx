@@ -2,7 +2,6 @@ import { createContext, ReactNode, useContext, useReducer } from 'react';
 
 import { IForm, IQuestion } from 'types/form';
 
-// 초기 상태
 const initialFormState: IForm = {
     id: 'FORM-1',
     title: '제목 없는 설문지',
@@ -12,7 +11,6 @@ const initialFormState: IForm = {
     focusInputID: undefined,
 };
 
-// 액션 타입들
 type FormAction =
     | { type: 'UPDATE_FORM'; payload: Partial<IForm> }
     | { type: 'UPDATE_TITLE'; payload: string }
@@ -23,8 +21,7 @@ type FormAction =
     | { type: 'UPDATE_QUESTION_BY_ID'; payload: { id: string; question: Partial<IQuestion> } }
     | { type: 'RESET_ANSWERS' };
 
-// 리듀서 함수
-function formReducer(state: IForm, action: FormAction): IForm {
+const formReducer = (state: IForm, action: FormAction): IForm => {
     switch (action.type) {
         case 'UPDATE_FORM':
             return { ...state, ...action.payload };
@@ -59,29 +56,25 @@ function formReducer(state: IForm, action: FormAction): IForm {
         default:
             return state;
     }
-}
+};
 
-// Context 인터페이스
 interface FormContextType {
     formState: IForm;
     dispatch: React.Dispatch<FormAction>;
 }
 
-// Context 생성
 const FormContext = createContext<FormContextType | undefined>(undefined);
 
-// Context Provider 컴포넌트
-export function FormProvider({ children }: { children: ReactNode }) {
+export const FormProvider = ({ children }: { children: ReactNode }) => {
     const [formState, dispatch] = useReducer(formReducer, initialFormState);
 
     return <FormContext.Provider value={{ formState, dispatch }}>{children}</FormContext.Provider>;
-}
+};
 
-// Custom Hook
-export function useFormContext() {
+export const useFormContext = () => {
     const context = useContext(FormContext);
     if (context === undefined) {
         throw new Error('useFormContext must be used within a FormProvider');
     }
     return context;
-}
+};

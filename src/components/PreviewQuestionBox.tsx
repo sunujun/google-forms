@@ -4,6 +4,7 @@ import Icon from '@expo/vector-icons/MaterialCommunityIcons';
 
 import { ANSWER_TYPE, CHOICE_ITEM_TYPE, INPUT_TYPE } from 'constant';
 import { useFormContext } from 'contexts/FormContext';
+import { useTheme } from 'contexts/ThemeContext';
 import { IQuestion } from 'types/form';
 
 import MultiLineInput from './MultiLineInput';
@@ -17,6 +18,7 @@ interface PreviewQuestionBoxProps {
 const PreviewQuestionBox = ({ item }: PreviewQuestionBoxProps) => {
     const { width } = useWindowDimensions();
     const { dispatch } = useFormContext();
+    const { colors } = useTheme();
 
     const etcID = item.optionList.find(option => option.type === CHOICE_ITEM_TYPE.ETC)?.id;
     const isMultipleError = item.isRequired && item.choiceAnswer === etcID && item.writeAnswer === '';
@@ -64,11 +66,18 @@ const PreviewQuestionBox = ({ item }: PreviewQuestionBoxProps) => {
     }, [isMultipleError, item.type, updateCheckIsRequired]);
 
     return (
-        <View style={item.checkIsRequired ? styles.errorContainer : styles.container}>
+        <View
+            style={
+                item.checkIsRequired
+                    ? [styles.errorContainer, { backgroundColor: colors.cardBackground, borderColor: colors.error }]
+                    : [styles.container, { backgroundColor: colors.cardBackground, borderColor: colors.border }]
+            }>
             <View style={styles.padding}>
                 <View style={styles.questionTextContainer}>
-                    <Text style={[styles.questionText, { maxWidth: width - 24 - 48 - 24 }]}>{item.question}</Text>
-                    {item.isRequired && <Text style={styles.requiredMark}>*</Text>}
+                    <Text style={[styles.questionText, { maxWidth: width - 24 - 48 - 24, color: colors.textPrimary }]}>
+                        {item.question}
+                    </Text>
+                    {item.isRequired && <Text style={[styles.requiredMark, { color: colors.error }]}>*</Text>}
                 </View>
                 {item.type === ANSWER_TYPE.Short && (
                     <SingleLineInput
@@ -108,14 +117,14 @@ const PreviewQuestionBox = ({ item }: PreviewQuestionBoxProps) => {
                 {item.type === ANSWER_TYPE.Multiple && !item.isRequired && item.choiceAnswer !== '' && (
                     <View style={styles.checkInitContainer}>
                         <TouchableHighlight activeOpacity={0.6} underlayColor="#DDDDDD" onPress={removeChoiceAnswer}>
-                            <Text style={styles.checkInitText}>선택해제</Text>
+                            <Text style={[styles.checkInitText, { color: colors.textSecondary }]}>선택해제</Text>
                         </TouchableHighlight>
                     </View>
                 )}
                 {item.checkIsRequired && (
                     <View style={styles.requiredContainer}>
-                        <Icon name="alert-circle-outline" color="#D93025" size={24} />
-                        <Text style={styles.requiredText}>필수 질문입니다.</Text>
+                        <Icon name="alert-circle-outline" color={colors.error} size={24} />
+                        <Text style={[styles.requiredText, { color: colors.error }]}>필수 질문입니다.</Text>
                     </View>
                 )}
             </View>
@@ -125,18 +134,14 @@ const PreviewQuestionBox = ({ item }: PreviewQuestionBoxProps) => {
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: '#FFFFFF',
         marginVertical: 12,
         borderWidth: 1,
-        borderColor: '#DADCE0',
         borderRadius: 4,
         minHeight: 28,
     },
     errorContainer: {
-        backgroundColor: '#FFFFFF',
         marginVertical: 12,
         borderWidth: 1,
-        borderColor: '#D93025',
         borderRadius: 4,
         minHeight: 28,
     },
@@ -153,10 +158,8 @@ const styles = StyleSheet.create({
         letterSpacing: 0.2,
         lineHeight: 16,
         fontWeight: '400',
-        color: '#202124',
     },
     requiredMark: {
-        color: '#D93025',
         fontWeight: '400',
         fontSize: 16,
         paddingLeft: 4,
@@ -172,7 +175,6 @@ const styles = StyleSheet.create({
         letterSpacing: 0,
         lineHeight: 14,
         fontWeight: '400',
-        color: '#D93025',
         marginLeft: 8,
     },
     checkInitContainer: {
@@ -183,7 +185,6 @@ const styles = StyleSheet.create({
         fontWeight: '500',
         letterSpacing: 0.25,
         lineHeight: 20,
-        color: '#5f6368',
         marginVertical: 4,
         marginHorizontal: 8,
     },

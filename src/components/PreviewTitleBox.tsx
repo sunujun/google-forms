@@ -1,21 +1,25 @@
 import { StyleSheet, Text, View } from 'react-native';
 
 import { useFormContext } from 'contexts/FormContext';
+import { useTheme } from 'contexts/ThemeContext';
 
 const PreviewTitleBox = () => {
     const { formState } = useFormContext();
+    const { colors } = useTheme();
     const hasIsRequired = formState.questionList.some(question => question.isRequired);
 
     return (
-        <View style={styles.container}>
-            <View style={styles.topMark} />
+        <View style={[styles.container, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
+            <View style={[styles.topMark, { backgroundColor: colors.primary }]} />
             <View style={styles.padding}>
-                <Text style={styles.title}>{formState.title}</Text>
-                {formState.description !== '' && <Text style={styles.description}>{formState.description}</Text>}
+                <Text style={[styles.title, { color: colors.textPrimary }]}>{formState.title}</Text>
+                {formState.description !== '' && (
+                    <Text style={[styles.description, { color: colors.textPrimary }]}>{formState.description}</Text>
+                )}
             </View>
             {hasIsRequired && (
-                <View style={styles.cautionContainer}>
-                    <Text style={styles.cautionText}>* 표시는 필수 질문임</Text>
+                <View style={[styles.cautionContainer, { borderColor: colors.border }]}>
+                    <Text style={[styles.cautionText, { color: colors.error }]}>* 표시는 필수 질문임</Text>
                 </View>
             )}
         </View>
@@ -24,15 +28,12 @@ const PreviewTitleBox = () => {
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: '#FFFFFF',
         marginVertical: 12,
         borderWidth: 1,
-        borderColor: '#DADCE0',
         borderRadius: 4,
         minHeight: 28,
     },
     topMark: {
-        backgroundColor: '#673AB7',
         borderTopLeftRadius: 4,
         borderTopRightRadius: 4,
         height: 10,
@@ -47,7 +48,6 @@ const styles = StyleSheet.create({
         fontSize: 24,
         letterSpacing: 0,
         fontWeight: '400',
-        color: '#202124',
         height: 40,
     },
     description: {
@@ -55,7 +55,6 @@ const styles = StyleSheet.create({
         letterSpacing: 0,
         lineHeight: 15,
         fontWeight: '400',
-        color: '#202124',
         marginTop: 8,
     },
     cautionContainer: {
@@ -63,14 +62,12 @@ const styles = StyleSheet.create({
         paddingVertical: 8,
         marginTop: -12,
         borderTopWidth: 1,
-        borderColor: '#DADCE0',
     },
     cautionText: {
         fontSize: 14,
         letterSpacing: 0.2,
         lineHeight: 20,
         fontWeight: '400',
-        color: '#D93025',
     },
 });
 
