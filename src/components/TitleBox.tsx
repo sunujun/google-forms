@@ -1,87 +1,69 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-import { useRecoilState, useSetRecoilState } from 'recoil';
 
 import { INPUT_TYPE } from 'constant';
-import { flatListState, formState } from 'states';
+import { useFormContext } from 'contexts/FormContext';
 
 import MultiLineInput from './MultiLineInput';
 
-const TitleBox = () => {
-    const [form, setForm] = useRecoilState(formState);
-    const setFlatList = useSetRecoilState(flatListState);
+interface TitleBoxProps {
+    updateFlatList?: (posY: number, height: number) => void;
+}
+
+const TitleBox = ({ updateFlatList }: TitleBoxProps) => {
+    const { formState, dispatch } = useFormContext();
+
     const titleInputRef = useRef<TextInput>(null);
     const descriptionInputRef = useRef<TextInput>(null);
 
-    const isSelected = form.selectedID === 'FORM-1';
+    const isSelected = formState.selectedID === 'FORM-1';
 
-    const updateTitle = useCallback(
+    const handleUpdateTitle = useCallback(
         (title: string) => {
-            setForm(previousState => {
-                return {
-                    ...previousState,
-                    title,
-                };
-            });
+            dispatch({ type: 'UPDATE_TITLE', payload: title });
         },
-        [setForm],
+        [dispatch],
     );
 
-    const updateDescription = (description: string) => {
-        setForm(previousState => {
-            return {
-                ...previousState,
-                description,
-            };
-        });
+    const handleUpdateDescription = (description: string) => {
+        dispatch({ type: 'UPDATE_DESCRIPTION', payload: description });
     };
 
     const onPressTitleBox = () => {
-        setForm(previousState => {
-            return {
-                ...previousState,
-                selectedID: 'FORM-1',
-            };
-        });
+        dispatch({ type: 'UPDATE_SELECTED_ID', payload: 'FORM-1' });
     };
 
     const onFocusTitleInput = () => {
-        setForm(prevForm => {
-            return { ...prevForm, focusInputID: 'TITLE-' + prevForm.id };
-        });
-        if (titleInputRef.current) {
+        dispatch({ type: 'UPDATE_FOCUS_INPUT_ID', payload: 'TITLE-' + formState.id });
+
+        // 텍스트 입력 위치 정보 업데이트
+        if (titleInputRef.current && updateFlatList) {
             titleInputRef.current.measureInWindow((_x, y, _width, height) => {
-                setFlatList({
-                    textInputPositionY: y,
-                    textInputHeight: height,
-                });
+                updateFlatList(y, height);
             });
         }
     };
 
     const onFocusDescriptionInput = () => {
-        setForm(prevForm => {
-            return { ...prevForm, focusInputID: 'DESCRIPTION-' + prevForm.id };
-        });
-        if (descriptionInputRef.current) {
+        dispatch({ type: 'UPDATE_FOCUS_INPUT_ID', payload: 'DESCRIPTION-' + formState.id });
+
+        // 텍스트 입력 위치 정보 업데이트
+        if (descriptionInputRef.current && updateFlatList) {
             descriptionInputRef.current.measureInWindow((_x, y, _width, height) => {
-                setFlatList({
-                    textInputPositionY: y,
-                    textInputHeight: height,
-                });
+                updateFlatList(y, height);
             });
         }
     };
 
     useEffect(() => {
         const timer = setTimeout(() => {
-            if (form.title === '') {
-                updateTitle('제목 없는 설문지');
+            if (formState.title === '') {
+                handleUpdateTitle('제목 없는 설문지');
             }
         }, 300);
 
         return () => clearTimeout(timer);
-    }, [form.title, updateTitle]);
+    }, [formState.title, handleUpdateTitle]);
 
     return (
         <Pressable style={styles.container} onPress={onPressTitleBox}>
@@ -93,24 +75,24 @@ const TitleBox = () => {
                         inputRef={titleInputRef}
                         type={INPUT_TYPE.Title}
                         placeholder="설문지 제목"
-                        value={form.title}
-                        onChangeText={updateTitle}
+                        value={formState.title}
+                        onChangeText={handleUpdateTitle}
                         onFocus={onFocusTitleInput}
                     />
                 ) : (
-                    <Text style={styles.title}>{form.title}</Text>
+                    <Text style={styles.title}>{formState.title}</Text>
                 )}
                 {isSelected ? (
                     <MultiLineInput
                         inputRef={descriptionInputRef}
                         type={INPUT_TYPE.Description}
                         placeholder="설문지 설명"
-                        value={form.description}
-                        onChangeText={updateDescription}
+                        value={formState.description}
+                        onChangeText={handleUpdateDescription}
                         onFocus={onFocusDescriptionInput}
                     />
                 ) : (
-                    <Text style={styles.description}>{form.description}</Text>
+                    <Text style={styles.description}>{formState.description}</Text>
                 )}
             </View>
         </Pressable>

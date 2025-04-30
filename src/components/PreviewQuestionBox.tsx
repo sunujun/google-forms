@@ -1,10 +1,10 @@
 import { useCallback, useEffect } from 'react';
 import { StyleSheet, Text, TouchableHighlight, useWindowDimensions, View } from 'react-native';
 import Icon from '@expo/vector-icons/MaterialCommunityIcons';
-import { useSetRecoilState } from 'recoil';
 
 import { ANSWER_TYPE, CHOICE_ITEM_TYPE, INPUT_TYPE } from 'constant';
-import { formState, IQuestion } from 'states';
+import { useFormContext } from 'contexts/FormContext';
+import { IQuestion } from 'types/form';
 
 import MultiLineInput from './MultiLineInput';
 import PreviewMultipleChoiceItem from './PreviewMultipleChoiceItem';
@@ -16,46 +16,44 @@ interface PreviewQuestionBoxProps {
 
 const PreviewQuestionBox = ({ item }: PreviewQuestionBoxProps) => {
     const { width } = useWindowDimensions();
-    const setForm = useSetRecoilState(formState);
+    const { dispatch } = useFormContext();
 
     const etcID = item.optionList.find(option => option.type === CHOICE_ITEM_TYPE.ETC)?.id;
     const isMultipleError = item.isRequired && item.choiceAnswer === etcID && item.writeAnswer === '';
 
     const updateWriteAnswer = (answer: string) => {
-        setForm(previousState => {
-            return {
-                ...previousState,
-                questionList: previousState.questionList.map(questionItem =>
-                    questionItem.id === item.id
-                        ? { ...questionItem, writeAnswer: answer, checkIsRequired: false }
-                        : questionItem,
-                ),
-            };
+        dispatch({
+            type: 'UPDATE_QUESTION_BY_ID',
+            payload: {
+                id: item.id,
+                question: {
+                    writeAnswer: answer,
+                    checkIsRequired: false,
+                },
+            },
         });
     };
 
     const updateCheckIsRequired = useCallback(
         (checkIsRequired: boolean) => {
-            setForm(previousState => {
-                return {
-                    ...previousState,
-                    questionList: previousState.questionList.map(questionItem =>
-                        questionItem.id === item.id ? { ...questionItem, checkIsRequired } : questionItem,
-                    ),
-                };
+            dispatch({
+                type: 'UPDATE_QUESTION_BY_ID',
+                payload: {
+                    id: item.id,
+                    question: { checkIsRequired },
+                },
             });
         },
-        [item.id, setForm],
+        [item.id, dispatch],
     );
 
     const removeChoiceAnswer = () => {
-        setForm(previousState => {
-            return {
-                ...previousState,
-                questionList: previousState.questionList.map(questionItem =>
-                    questionItem.id === item.id ? { ...questionItem, choiceAnswer: '' } : questionItem,
-                ),
-            };
+        dispatch({
+            type: 'UPDATE_QUESTION_BY_ID',
+            payload: {
+                id: item.id,
+                question: { choiceAnswer: '' },
+            },
         });
     };
 
@@ -73,21 +71,19 @@ const PreviewQuestionBox = ({ item }: PreviewQuestionBoxProps) => {
                     {item.isRequired && <Text style={styles.requiredMark}>*</Text>}
                 </View>
                 {item.type === ANSWER_TYPE.Short && (
-                    <View style={styles.shortInput}>
-                        <SingleLineInput
-                            placeholder="내 답변"
-                            value={item.writeAnswer}
-                            onChangeText={updateWriteAnswer}
-                            isError={item.isRequired ? item.checkIsRequired : undefined}
-                            onBlur={() => {
-                                if (item.isRequired && item.writeAnswer === '') {
-                                    updateCheckIsRequired(true);
-                                } else {
-                                    updateCheckIsRequired(false);
-                                }
-                            }}
-                        />
-                    </View>
+                    <SingleLineInput
+                        placeholder="내 답변"
+                        value={item.writeAnswer}
+                        onChangeText={updateWriteAnswer}
+                        isError={item.isRequired ? item.checkIsRequired : undefined}
+                        onBlur={() => {
+                            if (item.isRequired && item.writeAnswer === '') {
+                                updateCheckIsRequired(true);
+                            } else {
+                                updateCheckIsRequired(false);
+                            }
+                        }}
+                    />
                 )}
                 {item.type === ANSWER_TYPE.Long && (
                     <MultiLineInput
@@ -165,9 +161,6 @@ const styles = StyleSheet.create({
         fontSize: 16,
         paddingLeft: 4,
         width: 24,
-    },
-    shortInput: {
-        height: 24,
     },
     requiredContainer: {
         flexDirection: 'row',

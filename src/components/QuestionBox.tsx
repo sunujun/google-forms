@@ -1,67 +1,64 @@
 import { useEffect, useRef } from 'react';
-import {
-    GestureResponderEvent,
-    Pressable,
-    StyleSheet,
-    Switch,
-    Text,
-    TextInput,
-    useWindowDimensions,
-    View,
-} from 'react-native';
+import { Pressable, StyleSheet, Switch, Text, TextInput, useWindowDimensions, View } from 'react-native';
 import Icon from '@expo/vector-icons/MaterialCommunityIcons';
+import { useReorderableDrag } from 'react-native-reorderable-list';
 import uuid from 'react-native-uuid';
-import { useRecoilState, useSetRecoilState } from 'recoil';
 
 import { ANSWER_TYPE, CHOICE_ITEM_TYPE, INPUT_TYPE } from 'constant';
-import { flatListState, formState, IQuestion } from 'states';
+import { useFormContext } from 'contexts/FormContext';
+import { IQuestion } from 'types/form';
 
 import MultiLineInput from './MultiLineInput';
 import MultipleChoiceItem from './MultipleChoiceItem';
 
 interface QuestionBoxProps {
     item: IQuestion;
-    onLongPress?: ((event: GestureResponderEvent) => void) | null;
+    updateFlatList?: (posY: number, height: number) => void;
 }
 
-const QuestionBox = ({ item, onLongPress }: QuestionBoxProps) => {
+const QuestionBox = ({ item, updateFlatList }: QuestionBoxProps) => {
     const { width } = useWindowDimensions();
-    const [form, setForm] = useRecoilState(formState);
-    const setFlatList = useSetRecoilState(flatListState);
+    const { formState, dispatch } = useFormContext();
+
     const questionInputRef = useRef<TextInput>(null);
 
-    const isSelected = form.selectedID === item.id;
-    const questionList = form.questionList;
+    const isSelected = formState.selectedID === item.id;
+    const questionList = formState.questionList;
     const currentIndex = questionList.findIndex(questionItem => questionItem.id === item.id);
 
     const updateQuestion = (question: string) => {
-        setForm(previousState => {
-            return {
-                ...previousState,
-                questionList: previousState.questionList.map(questionItem =>
-                    questionItem.id === item.id ? { ...questionItem, question } : questionItem,
-                ),
-            };
+        dispatch({
+            type: 'UPDATE_QUESTION_BY_ID',
+            payload: {
+                id: item.id,
+                question: { question },
+            },
         });
     };
 
     const updateIsRequired = (isRequired: boolean) => {
-        setForm(previousState => {
-            return {
-                ...previousState,
-                questionList: previousState.questionList.map(questionItem =>
-                    questionItem.id === item.id ? { ...questionItem, isRequired } : questionItem,
-                ),
-                focusInputID: undefined,
-            };
+        dispatch({
+            type: 'UPDATE_QUESTION_BY_ID',
+            payload: {
+                id: item.id,
+                question: { isRequired },
+            },
         });
+        dispatch({ type: 'UPDATE_FOCUS_INPUT_ID', payload: undefined });
     };
 
     const deleteQuestion = () => {
-        const willSelectID = currentIndex === 0 ? form.id : questionList[currentIndex - 1].id;
+        const willSelectID = currentIndex === 0 ? formState.id : questionList[currentIndex - 1].id;
         const updatedQuestionList = questionList.filter(questionItem => questionItem.id !== item.id);
 
-        setForm({ ...form, questionList: updatedQuestionList, selectedID: willSelectID, focusInputID: undefined });
+        dispatch({
+            type: 'UPDATE_FORM',
+            payload: {
+                questionList: updatedQuestionList,
+                selectedID: willSelectID,
+                focusInputID: undefined,
+            },
+        });
     };
 
     const copyQuestion = () => {
@@ -73,51 +70,48 @@ const QuestionBox = ({ item, onLongPress }: QuestionBoxProps) => {
             ...questionList.slice(currentIndex + 1),
         ];
 
-        setForm({ ...form, questionList: updatedQuestionList, selectedID: newID });
+        dispatch({
+            type: 'UPDATE_FORM',
+            payload: {
+                questionList: updatedQuestionList,
+                selectedID: newID,
+            },
+        });
     };
 
     const onFocus = () => {
-        setForm(prevForm => {
-            return { ...prevForm, focusInputID: item.id };
-        });
-        if (questionInputRef.current) {
+        dispatch({ type: 'UPDATE_FOCUS_INPUT_ID', payload: item.id });
+
+        if (questionInputRef.current && updateFlatList) {
             questionInputRef.current.measureInWindow((_x, y, _width, height) => {
-                setFlatList({
-                    textInputPositionY: y,
-                    textInputHeight: height,
-                });
+                updateFlatList(y, height);
             });
         }
     };
 
-    useEffect(() => {
-        if (isSelected) {
-            setForm(prevForm => {
-                return { ...prevForm, focusInputID: item.id };
-            });
-        }
-    }, [isSelected, item.id, setForm]);
+    const drag = useReorderableDrag();
 
     useEffect(() => {
-        if (item.id === form.focusInputID) {
+        if (isSelected) {
+            dispatch({ type: 'UPDATE_FOCUS_INPUT_ID', payload: item.id });
+        }
+    }, [isSelected, item.id, dispatch]);
+
+    useEffect(() => {
+        if (item.id === formState.focusInputID) {
             questionInputRef.current?.focus();
         } else {
             questionInputRef.current?.blur();
         }
-    }, [form.focusInputID, item.id, setForm]);
+    }, [formState.focusInputID, item.id]);
 
     return (
         <Pressable
             style={styles.container}
             onPress={() => {
-                setForm(previousState => {
-                    return {
-                        ...previousState,
-                        selectedID: item.id,
-                    };
-                });
+                dispatch({ type: 'UPDATE_SELECTED_ID', payload: item.id });
             }}
-            onLongPress={onLongPress}>
+            onLongPress={drag}>
             {isSelected && <View style={styles.selectedMark} />}
             <View style={styles.padding}>
                 {isSelected ? (
@@ -161,6 +155,7 @@ const QuestionBox = ({ item, onLongPress }: QuestionBoxProps) => {
                                 item={option}
                                 questionID={item.id}
                                 questionType={item.type}
+                                updateFlatList={updateFlatList}
                             />
                         );
                     })}
@@ -169,6 +164,7 @@ const QuestionBox = ({ item, onLongPress }: QuestionBoxProps) => {
                         item={{ id: 'ADD-1', label: '', type: CHOICE_ITEM_TYPE.Add }}
                         questionID={item.id}
                         questionType={item.type}
+                        updateFlatList={updateFlatList}
                     />
                 )}
                 {isSelected && (

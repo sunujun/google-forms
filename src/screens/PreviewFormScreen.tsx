@@ -2,13 +2,13 @@ import { useCallback, useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { KeyboardAwareFlatList } from 'react-native-keyboard-aware-scroll-view';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useRecoilState } from 'recoil';
 
 import { PreviewQuestionBox, PreviewTitleBox } from 'components';
-import { formState, IQuestion } from 'states';
+import { useFormContext } from 'contexts/FormContext';
+import { IQuestion } from 'types/form';
 
 const PreviewFormScreen = () => {
-    const [form, setForm] = useRecoilState(formState);
+    const { formState, dispatch } = useFormContext();
     const safeAreaInset = useSafeAreaInsets();
 
     const ListHeaderComponent = useCallback(() => {
@@ -20,26 +20,20 @@ const PreviewFormScreen = () => {
     };
 
     useEffect(() => {
-        const initAnswer: Pick<IQuestion, 'writeAnswer' | 'choiceAnswer' | 'checkAnswer' | 'checkIsRequired'> = {
-            writeAnswer: '',
-            choiceAnswer: '',
-            checkAnswer: [],
-            checkIsRequired: false,
-        };
+        // 화면 진입 시 초기화 작업이 필요하다면 여기에 추가
 
-        setForm(previousState => {
-            return {
-                ...previousState,
-                questionList: previousState.questionList.map(questionItem => ({ ...questionItem, ...initAnswer })),
-            };
-        });
-    }, [setForm]);
+        // 화면에서 나갈 때(컴포넌트 언마운트 시) 모든 질문의 답변 상태 초기화
+        return () => {
+            // RESET_ANSWERS 액션을 디스패치하여 모든 답변 초기화
+            dispatch({ type: 'RESET_ANSWERS' });
+        };
+    }, [dispatch]);
 
     return (
         <View style={styles.container}>
             <KeyboardAwareFlatList
                 contentContainerStyle={{ paddingBottom: safeAreaInset.bottom }}
-                data={form.questionList}
+                data={formState.questionList}
                 showsVerticalScrollIndicator={false}
                 keyExtractor={item => item.id}
                 renderItem={renderItem}

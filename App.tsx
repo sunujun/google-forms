@@ -1,21 +1,21 @@
 import { ActionSheetProvider } from '@expo/react-native-action-sheet';
 import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { RecoilRoot } from 'recoil';
 
+import { FormProvider } from 'contexts/FormContext';
 import { RootStackNavigation } from 'navigation';
 
 const App = () => {
     return (
-        <RecoilRoot>
-            <SafeAreaProvider>
-                <ActionSheetProvider>
+        <SafeAreaProvider>
+            <ActionSheetProvider>
+                <FormProvider>
                     <NavigationContainer>
                         <RootStackNavigation />
                     </NavigationContainer>
-                </ActionSheetProvider>
-            </SafeAreaProvider>
-        </RecoilRoot>
+                </FormProvider>
+            </ActionSheetProvider>
+        </SafeAreaProvider>
     );
 };
 

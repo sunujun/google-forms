@@ -1,26 +1,29 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Keyboard, Platform, StyleSheet, View } from 'react-native';
+import { Keyboard, ListRenderItemInfo, Platform, StyleSheet, View } from 'react-native';
 import { useActionSheet } from '@expo/react-native-action-sheet';
 import Icon from '@expo/vector-icons/MaterialCommunityIcons';
-import { OpacityDecorator, RenderItemParams } from 'react-native-draggable-flatlist';
 import { KeyboardAwareFlatList } from 'react-native-keyboard-aware-scroll-view';
+import ReorderableList, { ReorderableListReorderEvent, reorderItems } from 'react-native-reorderable-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import uuid from 'react-native-uuid';
-import { useRecoilState, useRecoilValue } from 'recoil';
 
 import { Button, QuestionBox, TitleBox } from 'components';
-import KeyboardAwareDraggableFlatList from 'components/KeyboardAwareDraggableFlatList';
 import { ANSWER_TYPE, AnswerID, CHOICE_ITEM_TYPE } from 'constant';
-import { flatListState, formState, IQuestion } from 'states';
+import { useFormContext } from 'contexts/FormContext';
+import { IFlatList, IQuestion } from 'types/form';
 
 const MakeFormScreen = () => {
     const safeAreaInset = useSafeAreaInsets();
     const { showActionSheetWithOptions } = useActionSheet();
-    const [form, setForm] = useRecoilState(formState);
-    const flatList = useRecoilValue(flatListState);
+
+    const { formState, dispatch } = useFormContext();
 
     const scrollOffsetY = useRef(0);
 
+    const [flatList, setFlatList] = useState<IFlatList>({
+        textInputPositionY: 0,
+        textInputHeight: 0,
+    });
     const [resetOffsetY, setResetOffsetY] = useState<number | null>(null);
 
     const addQuestion = (type: AnswerID) => {
@@ -45,9 +48,16 @@ const MakeFormScreen = () => {
             checkAnswer: [],
             checkIsRequired: false,
         };
-        const updatedQuestionList = [...form.questionList, newQuestion];
 
-        setForm({ ...form, questionList: updatedQuestionList, selectedID: newID });
+        // Add new question and update selected ID
+        const updatedQuestionList = [...formState.questionList, newQuestion];
+        dispatch({
+            type: 'UPDATE_FORM',
+            payload: {
+                questionList: updatedQuestionList,
+                selectedID: newID,
+            },
+        });
     };
 
     const onPressFloatingButton = () => {
@@ -86,16 +96,21 @@ const MakeFormScreen = () => {
         return <TitleBox />;
     }, []);
 
-    const renderItem = ({ item, drag }: RenderItemParams<IQuestion>) => {
+    const renderItem = ({ item }: ListRenderItemInfo<IQuestion>) => {
         return (
-            <OpacityDecorator>
-                <QuestionBox item={item} onLongPress={drag} />
-            </OpacityDecorator>
+            <QuestionBox
+                item={item}
+                updateFlatList={(pos, height) => setFlatList({ textInputPositionY: pos, textInputHeight: height })}
+            />
         );
     };
 
-    const onDragEnd = ({ data }: { data: IQuestion[] }) => {
-        setForm({ ...form, questionList: data });
+    const handleReorder = ({ from, to }: ReorderableListReorderEvent) => {
+        const newQuestions = reorderItems(formState.questionList, from, to);
+        dispatch({
+            type: 'UPDATE_QUESTION_LIST',
+            payload: newQuestions,
+        });
     };
 
     useEffect(() => {
@@ -113,6 +128,7 @@ const MakeFormScreen = () => {
                 flatListRef.current?.scrollToPosition(0, 0, true);
             }
         };
+
         if (Platform.OS === 'ios') {
             const showSubscription = Keyboard.addListener('keyboardWillShow', () => {
                 updateOffset();
@@ -153,22 +169,18 @@ const MakeFormScreen = () => {
     }, [flatList.textInputHeight, flatList.textInputPositionY, resetOffsetY]);
 
     const flatListRef = useRef<KeyboardAwareFlatList>(null);
+
     return (
         <View style={styles.container}>
-            <KeyboardAwareDraggableFlatList
-                ref={flatListRef}
-                containerStyle={styles.flatListContainer}
+            <ReorderableList
+                data={formState.questionList}
+                style={styles.flatListContainer}
                 contentContainerStyle={{ paddingBottom: safeAreaInset.bottom }}
-                data={form.questionList}
                 showsVerticalScrollIndicator={false}
-                keyExtractor={(item: IQuestion) => item.id}
+                onReorder={handleReorder}
                 renderItem={renderItem}
                 ListHeaderComponent={ListHeaderComponent}
-                onDragEnd={onDragEnd}
-                onScrollOffsetChange={(scrollOffset: number) => {
-                    scrollOffsetY.current = scrollOffset;
-                }}
-                removeClippedSubviews={false}
+                keyExtractor={(item: IQuestion) => item.id}
             />
             <View style={[styles.floatingButtonContainer, { bottom: safeAreaInset.bottom + 24 }]}>
                 <Button onPress={onPressFloatingButton}>

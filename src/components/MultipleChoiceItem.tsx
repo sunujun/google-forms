@@ -2,10 +2,10 @@ import { useCallback, useEffect, useRef } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Icon from '@expo/vector-icons/MaterialCommunityIcons';
 import uuid from 'react-native-uuid';
-import { useRecoilState, useSetRecoilState } from 'recoil';
 
 import { ANSWER_TYPE, AnswerID, CHOICE_ITEM_TYPE } from 'constant';
-import { flatListState, formState, IOption } from 'states';
+import { useFormContext } from 'contexts/FormContext';
+import { IOption } from 'types/form';
 
 import SingleLineInput from './SingleLineInput';
 
@@ -13,115 +13,107 @@ interface MultipleChoiceItemProps {
     item: IOption;
     questionID: string;
     questionType: AnswerID;
+    updateFlatList?: (posY: number, height: number) => void;
 }
 
-const MultipleChoiceItem = ({ item, questionID, questionType }: MultipleChoiceItemProps) => {
-    const [form, setForm] = useRecoilState(formState);
-    const setFlatList = useSetRecoilState(flatListState);
+const MultipleChoiceItem = ({ item, questionID, questionType, updateFlatList }: MultipleChoiceItemProps) => {
+    const { formState, dispatch } = useFormContext();
     const labelInputRef = useRef<TextInput>(null);
 
-    const questionList = form.questionList;
+    const questionList = formState.questionList;
     const questionIndex = questionList.findIndex(question => question.id === questionID);
     const optionList = questionList[questionIndex].optionList;
     const optionIndex = optionList.findIndex(option => option.id === item.id);
     const hasETCOption = optionList.some(option => option.type === CHOICE_ITEM_TYPE.ETC);
     const optionCount = optionList.filter(option => option.type === CHOICE_ITEM_TYPE.Label).length;
     const hasClose = item.type === CHOICE_ITEM_TYPE.ETC || (item.type === CHOICE_ITEM_TYPE.Label && optionCount > 1);
-    const isQuestionSelected = questionID === form.selectedID;
+    const isQuestionSelected = questionID === formState.selectedID;
     const firstDuplicateIndex = optionList.findIndex(option => option.label === item.label);
     const hasDuplicate = optionList.some(option => option.id !== item.id && option.label === item.label);
     const isError = optionIndex !== firstDuplicateIndex && hasDuplicate;
 
     const updateLabelOption = useCallback(
         (label: string) => {
-            setForm(prevForm => {
-                const updatedOptionList = [...prevForm.questionList[questionIndex].optionList];
-                updatedOptionList[optionIndex] = { ...updatedOptionList[optionIndex], label };
+            // 질문 내의 옵션 리스트 업데이트
+            const updatedOptionList = [...optionList];
+            updatedOptionList[optionIndex] = { ...updatedOptionList[optionIndex], label };
 
-                const updatedQuestionList = [...prevForm.questionList];
-                updatedQuestionList[questionIndex] = {
-                    ...updatedQuestionList[questionIndex],
-                    optionList: updatedOptionList,
-                };
-
-                const updatedForm = { ...prevForm, questionList: updatedQuestionList };
-
-                return updatedForm;
+            // 질문 리스트 업데이트
+            dispatch({
+                type: 'UPDATE_QUESTION_BY_ID',
+                payload: {
+                    id: questionID,
+                    question: { optionList: updatedOptionList },
+                },
             });
         },
-        [optionIndex, questionIndex, setForm],
+        [questionID, optionList, optionIndex, dispatch],
     );
 
     const addOption = () => {
-        setForm(prevForm => {
-            const updatedOptionList = [...prevForm.questionList[questionIndex].optionList];
-            const newOption = {
-                id: 'OPTION-' + uuid.v4(),
-                type: CHOICE_ITEM_TYPE.Label,
-                label: '옵션 ' + (optionCount + 1).toString(),
-            };
-            if (hasETCOption) {
-                updatedOptionList.splice(updatedOptionList.length - 1, 0, newOption);
-            } else {
-                updatedOptionList.push(newOption);
-            }
+        // 새 옵션 추가
+        const updatedOptionList = [...optionList];
+        const newOption = {
+            id: 'OPTION-' + uuid.v4(),
+            type: CHOICE_ITEM_TYPE.Label,
+            label: '옵션 ' + (optionCount + 1).toString(),
+        };
 
-            const updatedQuestionList = [...prevForm.questionList];
-            updatedQuestionList[questionIndex] = {
-                ...updatedQuestionList[questionIndex],
-                optionList: updatedOptionList,
-            };
+        if (hasETCOption) {
+            updatedOptionList.splice(updatedOptionList.length - 1, 0, newOption);
+        } else {
+            updatedOptionList.push(newOption);
+        }
 
-            const updatedForm = { ...prevForm, questionList: updatedQuestionList };
-
-            return updatedForm;
+        // 질문 리스트 업데이트
+        dispatch({
+            type: 'UPDATE_QUESTION_BY_ID',
+            payload: {
+                id: questionID,
+                question: { optionList: updatedOptionList },
+            },
         });
     };
 
     const addETCOption = () => {
-        setForm(prevForm => {
-            const updatedOptionList = [...prevForm.questionList[questionIndex].optionList];
-            const newOption: IOption = {
-                id: 'OPTION-' + uuid.v4(),
-                type: CHOICE_ITEM_TYPE.ETC,
-                label: '기타...',
-            };
-            updatedOptionList.push(newOption);
+        // 기타 옵션 추가
+        const updatedOptionList = [...optionList];
+        const newOption: IOption = {
+            id: 'OPTION-' + uuid.v4(),
+            type: CHOICE_ITEM_TYPE.ETC,
+            label: '기타...',
+        };
+        updatedOptionList.push(newOption);
 
-            const updatedQuestionList = [...prevForm.questionList];
-            updatedQuestionList[questionIndex] = {
-                ...updatedQuestionList[questionIndex],
-                optionList: updatedOptionList,
-            };
-
-            const updatedForm = { ...prevForm, questionList: updatedQuestionList, focusInputID: undefined };
-
-            return updatedForm;
+        // 질문 리스트 업데이트
+        dispatch({
+            type: 'UPDATE_QUESTION_BY_ID',
+            payload: {
+                id: questionID,
+                question: { optionList: updatedOptionList },
+            },
         });
+        dispatch({ type: 'UPDATE_FOCUS_INPUT_ID', payload: undefined });
     };
 
     const deleteOption = () => {
-        setForm(prevForm => {
-            const willFocusID = optionIndex === 0 ? optionList[0].id : optionList[optionIndex - 1].id;
+        // 옵션을 삭제하고 다음에 포커스할 ID 결정
+        const willFocusID = optionIndex === 0 ? optionList[0].id : optionList[optionIndex - 1].id;
+        const updatedOptionList = optionList.filter(option => option.id !== item.id);
 
-            const updatedOptionList = [...prevForm.questionList[questionIndex].optionList].filter(
-                option => option.id !== item.id,
-            );
+        if (updatedOptionList.length === 0) {
+            return; // 옵션이 없는 경우 삭제하지 않음
+        }
 
-            if (updateLabelOption.length === 0) {
-                return prevForm;
-            }
-
-            const updatedQuestionList = [...prevForm.questionList];
-            updatedQuestionList[questionIndex] = {
-                ...updatedQuestionList[questionIndex],
-                optionList: updatedOptionList,
-            };
-
-            const updatedForm = { ...prevForm, questionList: updatedQuestionList, focusInputID: willFocusID };
-
-            return updatedForm;
+        // 질문 리스트 업데이트
+        dispatch({
+            type: 'UPDATE_QUESTION_BY_ID',
+            payload: {
+                id: questionID,
+                question: { optionList: updatedOptionList },
+            },
         });
+        dispatch({ type: 'UPDATE_FOCUS_INPUT_ID', payload: willFocusID });
     };
 
     const onPressCheckBox = () => {
@@ -139,15 +131,12 @@ const MultipleChoiceItem = ({ item, questionID, questionType }: MultipleChoiceIt
     };
 
     const onFocus = () => {
-        setForm(prevForm => {
-            return { ...prevForm, focusInputID: item.id };
-        });
-        if (labelInputRef.current) {
+        dispatch({ type: 'UPDATE_FOCUS_INPUT_ID', payload: item.id });
+
+        // 텍스트 입력 위치 정보 업데이트
+        if (labelInputRef.current && updateFlatList) {
             labelInputRef.current.measureInWindow((_x, y, _width, height) => {
-                setFlatList({
-                    textInputPositionY: y,
-                    textInputHeight: height,
-                });
+                updateFlatList(y, height);
             });
         }
     };
@@ -164,19 +153,17 @@ const MultipleChoiceItem = ({ item, questionID, questionType }: MultipleChoiceIt
 
     useEffect(() => {
         if (item.label !== '옵션 1') {
-            setForm(prevForm => {
-                return { ...prevForm, focusInputID: item.id };
-            });
+            dispatch({ type: 'UPDATE_FOCUS_INPUT_ID', payload: item.id });
         }
-    }, [item.id, item.label, setForm]);
+    }, [item.id, item.label, dispatch]);
 
     useEffect(() => {
-        if (item.id === form.focusInputID) {
+        if (item.id === formState.focusInputID) {
             labelInputRef.current?.focus();
         } else {
             labelInputRef.current?.blur();
         }
-    }, [form.focusInputID, item.id, setForm]);
+    }, [formState.focusInputID, item.id]);
 
     return (
         <View style={styles.container}>
@@ -240,6 +227,7 @@ const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
         marginBottom: 20,
+        alignItems: 'center',
     },
     etcOptionText: {
         marginLeft: 8,

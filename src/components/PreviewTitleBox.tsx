@@ -1,18 +1,17 @@
 import { StyleSheet, Text, View } from 'react-native';
-import { useRecoilValue } from 'recoil';
 
-import { formState } from 'states';
+import { useFormContext } from 'contexts/FormContext';
 
 const PreviewTitleBox = () => {
-    const form = useRecoilValue(formState);
-    const hasIsRequired = form.questionList.some(question => question.isRequired);
+    const { formState } = useFormContext();
+    const hasIsRequired = formState.questionList.some(question => question.isRequired);
 
     return (
         <View style={styles.container}>
             <View style={styles.topMark} />
             <View style={styles.padding}>
-                <Text style={styles.title}>{form.title}</Text>
-                {form.description !== '' && <Text style={styles.description}>{form.description}</Text>}
+                <Text style={styles.title}>{formState.title}</Text>
+                {formState.description !== '' && <Text style={styles.description}>{formState.description}</Text>}
             </View>
             {hasIsRequired && (
                 <View style={styles.cautionContainer}>

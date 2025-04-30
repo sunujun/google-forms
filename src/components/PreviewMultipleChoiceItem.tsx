@@ -1,10 +1,10 @@
 import { useRef } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Icon from '@expo/vector-icons/MaterialCommunityIcons';
-import { useSetRecoilState } from 'recoil';
 
 import { ANSWER_TYPE, CHOICE_ITEM_TYPE } from 'constant';
-import { formState, IOption, IQuestion } from 'states';
+import { useFormContext } from 'contexts/FormContext';
+import { IOption, IQuestion } from 'types/form';
 
 import SingleLineInput from './SingleLineInput';
 
@@ -14,19 +14,20 @@ interface PreviewMultipleChoiceItemProps {
 }
 
 const PreviewMultipleChoiceItem = ({ item, question }: PreviewMultipleChoiceItemProps) => {
-    const setForm = useSetRecoilState(formState);
+    const { dispatch } = useFormContext();
     const etcInputRef = useRef<TextInput>(null);
 
     const updateWriteAnswer = (answer: string) => {
-        setForm(previousState => {
-            return {
-                ...previousState,
-                questionList: previousState.questionList.map(questionItem =>
-                    questionItem.id === question.id
-                        ? { ...questionItem, choiceAnswer: item.id, writeAnswer: answer, checkIsRequired: false }
-                        : questionItem,
-                ),
-            };
+        dispatch({
+            type: 'UPDATE_QUESTION_BY_ID',
+            payload: {
+                id: question.id,
+                question: {
+                    choiceAnswer: item.id,
+                    writeAnswer: answer,
+                    checkIsRequired: false,
+                },
+            },
         });
     };
 
@@ -35,25 +36,23 @@ const PreviewMultipleChoiceItem = ({ item, question }: PreviewMultipleChoiceItem
             if (item.type === CHOICE_ITEM_TYPE.ETC) {
                 etcInputRef.current?.focus();
             }
-            setForm(previousState => {
-                return {
-                    ...previousState,
-                    questionList: previousState.questionList.map(questionItem =>
-                        questionItem.id === question.id ? { ...questionItem, choiceAnswer: item.id } : questionItem,
-                    ),
-                };
+            dispatch({
+                type: 'UPDATE_QUESTION_BY_ID',
+                payload: {
+                    id: question.id,
+                    question: { choiceAnswer: item.id },
+                },
             });
         } else if (question.choiceAnswer === item.id && !question.isRequired) {
             if (item.type === CHOICE_ITEM_TYPE.ETC) {
                 etcInputRef.current?.blur();
             }
-            setForm(previousState => {
-                return {
-                    ...previousState,
-                    questionList: previousState.questionList.map(questionItem =>
-                        questionItem.id === question.id ? { ...questionItem, choiceAnswer: '' } : questionItem,
-                    ),
-                };
+            dispatch({
+                type: 'UPDATE_QUESTION_BY_ID',
+                payload: {
+                    id: question.id,
+                    question: { choiceAnswer: '' },
+                },
             });
         } else if (question.choiceAnswer === item.id && question.isRequired) {
             if (item.type === CHOICE_ITEM_TYPE.ETC) {
@@ -67,38 +66,36 @@ const PreviewMultipleChoiceItem = ({ item, question }: PreviewMultipleChoiceItem
             if (item.type === CHOICE_ITEM_TYPE.ETC) {
                 etcInputRef.current?.blur();
             }
-            setForm(previousState => {
-                return {
-                    ...previousState,
-                    questionList: previousState.questionList.map(questionItem => {
-                        if (questionItem.id === question.id) {
-                            const updatedCheckAnswer = question.checkAnswer.filter(answer => answer !== item.id);
-                            const checkIsRequired = question.isRequired && updatedCheckAnswer.length === 0;
 
-                            return { ...questionItem, checkAnswer: updatedCheckAnswer, checkIsRequired };
-                        }
+            const updatedCheckAnswer = question.checkAnswer.filter(answer => answer !== item.id);
+            const checkIsRequired = question.isRequired && updatedCheckAnswer.length === 0;
 
-                        return questionItem;
-                    }),
-                };
+            dispatch({
+                type: 'UPDATE_QUESTION_BY_ID',
+                payload: {
+                    id: question.id,
+                    question: {
+                        checkAnswer: updatedCheckAnswer,
+                        checkIsRequired,
+                    },
+                },
             });
         } else {
             if (item.type === CHOICE_ITEM_TYPE.ETC) {
                 etcInputRef.current?.focus();
             }
-            setForm(previousState => {
-                return {
-                    ...previousState,
-                    questionList: previousState.questionList.map(questionItem => {
-                        if (questionItem.id === question.id) {
-                            const updatedCheckAnswer = [...question.checkAnswer, item.id];
 
-                            return { ...questionItem, checkAnswer: updatedCheckAnswer, checkIsRequired: false };
-                        }
+            const updatedCheckAnswer = [...question.checkAnswer, item.id];
 
-                        return questionItem;
-                    }),
-                };
+            dispatch({
+                type: 'UPDATE_QUESTION_BY_ID',
+                payload: {
+                    id: question.id,
+                    question: {
+                        checkAnswer: updatedCheckAnswer,
+                        checkIsRequired: false,
+                    },
+                },
             });
         }
     };

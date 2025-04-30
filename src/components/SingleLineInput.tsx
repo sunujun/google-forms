@@ -108,6 +108,7 @@ const styles = StyleSheet.create({
         color: '#202124',
         borderBottomWidth: 1,
         borderBottomColor: '#DADCE0',
+        // backgroundColor: 'red',
     },
     errorOption: {
         flex: 1,
