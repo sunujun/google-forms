@@ -69,6 +69,8 @@ const MakeFormScreen = () => {
             {
                 options,
                 cancelButtonIndex,
+                containerStyle: { backgroundColor: colors.background },
+                textStyle: { color: colors.textPrimary },
             },
             (selectedIndex?: number) => {
                 switch (selectedIndex) {

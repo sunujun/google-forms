@@ -4,7 +4,6 @@ import { KeyboardAwareFlatList } from 'react-native-keyboard-aware-scroll-view';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { PreviewQuestionBox, PreviewTitleBox } from 'components';
-import { ColorSchemeButton } from 'components/ColorSchemeButton';
 import { useFormContext } from 'contexts/FormContext';
 import { useTheme } from 'contexts/ThemeContext';
 import { IQuestion } from 'types/form';
@@ -42,9 +41,6 @@ const PreviewFormScreen = () => {
                 extraHeight={200}
                 removeClippedSubviews={false}
             />
-            <View style={[styles.floatingButtonContainer, { bottom: safeAreaInset.bottom + 24 }]}>
-                <ColorSchemeButton />
-            </View>
         </View>
     );
 };

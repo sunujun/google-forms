@@ -20,7 +20,7 @@ export const ColorSchemeButton = () => {
     return (
         <GestureDetector gesture={tap}>
             <View collapsable={false}>
-                <Feather name={colorScheme === 'light' ? 'moon' : 'sun'} color={colors.primary} size={32} />
+                <Feather name={colorScheme === 'light' ? 'moon' : 'sun'} color={colors.primary} size={28} />
             </View>
         </GestureDetector>
     );
