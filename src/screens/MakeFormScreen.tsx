@@ -201,7 +201,6 @@ const MakeFormScreen = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        paddingHorizontal: 12,
     },
     floatingButtonContainer: {
         position: 'absolute',
@@ -223,6 +222,7 @@ const styles = StyleSheet.create({
     },
     flatListContainer: {
         flex: 1,
+        paddingHorizontal: 12,
     },
 });
 

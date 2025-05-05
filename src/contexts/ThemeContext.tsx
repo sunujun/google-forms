@@ -1,47 +1,35 @@
-import { createContext, ReactNode, useContext, useMemo, useState } from 'react';
-import { useColorScheme } from 'react-native';
+import { createContext, ReactNode, useContext } from 'react';
 
 import { colors } from 'constant/colors';
+
+import { useColorScheme } from './ColorSchemeContext';
 
 export type ThemeType = 'light' | 'dark' | 'system';
 
 interface ThemeContextType {
-    theme: ThemeType;
-    isDarkMode: boolean;
-    setTheme: (theme: ThemeType) => void;
     colors: typeof colors.light;
+    isDarkMode: boolean;
 }
 
 const ThemeContext = createContext<ThemeContextType>({
-    theme: 'system',
-    isDarkMode: true,
-    setTheme: () => {},
-    colors: colors.dark,
+    colors: colors.light,
+    isDarkMode: false,
 });
 
 interface ThemeProviderProps {
     children: ReactNode;
 }
 
-export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-    const systemColorScheme = useColorScheme();
+export const ThemeProvider = ({ children }: ThemeProviderProps) => {
+    const { colorScheme } = useColorScheme();
 
-    const [theme, setTheme] = useState<ThemeType>('system');
-
-    const isDarkMode = useMemo(() => {
-        if (theme === 'system') {
-            return systemColorScheme === 'dark';
-        }
-        return theme === 'dark';
-    }, [theme, systemColorScheme]);
+    const isDarkMode = colorScheme === 'dark';
 
     const currentColors = isDarkMode ? colors.dark : colors.light;
 
     const contextValue: ThemeContextType = {
-        theme,
-        isDarkMode,
-        setTheme,
         colors: currentColors,
+        isDarkMode,
     };
 
     return <ThemeContext.Provider value={contextValue}>{children}</ThemeContext.Provider>;
