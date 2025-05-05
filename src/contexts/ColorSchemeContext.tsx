@@ -1,7 +1,8 @@
 import type { ReactNode, RefObject } from 'react';
 import { createContext, useCallback, useContext, useMemo, useReducer, useRef } from 'react';
-import { Appearance, Dimensions, StyleSheet, View } from 'react-native';
+import { Appearance, Dimensions, StatusBar as RNStatusBar, StyleSheet, View } from 'react-native';
 import { Canvas, Circle, dist, Image, ImageShader, makeImageFromView, mix, vec } from '@shopify/react-native-skia';
+import { StatusBar } from 'expo-status-bar';
 import { Easing, useDerivedValue, useSharedValue, withTiming } from 'react-native-reanimated';
 
 import type { SkImage } from '@shopify/react-native-skia';
@@ -180,14 +181,30 @@ export const ColorSchemeProvider = ({ children }: ColorSchemeProviderProps) => {
     return (
         <View style={styles.container}>
             <View ref={ref} style={styles.container} collapsable={false}>
+                <StatusBar style={statusBarStyle} />
                 <ColorSchemeContext.Provider value={contextValue}>{children}</ColorSchemeContext.Provider>
             </View>
 
             {active && (
                 <Canvas style={styles.canvas}>
-                    {overlay1 && <Image image={overlay1} x={0} y={0} width={width} height={height} />}
+                    {overlay1 && (
+                        <Image
+                            image={overlay1}
+                            x={0}
+                            y={0}
+                            width={width}
+                            height={RNStatusBar.currentHeight ? height + RNStatusBar.currentHeight : height}
+                        />
+                    )}
                     <Circle c={circle} r={r}>
-                        <ImageShader image={overlay2} x={0} y={0} width={width} height={height} fit="cover" />
+                        <ImageShader
+                            image={overlay2}
+                            x={0}
+                            y={0}
+                            width={width}
+                            height={RNStatusBar.currentHeight ? height + RNStatusBar.currentHeight : height}
+                            fit="cover"
+                        />
                     </Circle>
                 </Canvas>
             )}
