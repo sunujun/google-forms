@@ -38,7 +38,7 @@ const RootStackNavigation = () => {
                 name="MakeForm"
                 component={MakeFormScreen}
                 options={{
-                    headerTitle: '폼 생성',
+                    headerTitle: '설문지 생성',
                     headerTitleStyle: {
                         fontSize: 16,
                         lineHeight: 24,
